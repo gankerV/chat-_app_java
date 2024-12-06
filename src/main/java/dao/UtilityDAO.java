@@ -1,21 +1,22 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class UtilityDAO {
     String dbms = "mysql";
     String serverName = "localhost";
     int portNumber = 3306;
-    String dbName = "user_list";
+    String dbName = "";
     String user = "root";
-    String password = "3333";
+    String password = "";
     public Connection getConnection(){
         Connection conn = null;
         Properties connectionProps = new Properties();
         connectionProps.put("user", user);
         connectionProps.put("password", password);
-
         
 
         try {
