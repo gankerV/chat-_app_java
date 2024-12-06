@@ -4,6 +4,7 @@ chat_system\ChangePassword$1.class
 chat_system\Login$1.class
 chat_system\Unfriend_and_Report.class
 admin_system\Group.class
+connect_db\UtilityDAO.class
 chat_system\Login.class
 chat_system\PasswordRecovery.class
 swing\PanelSlide$1.class
@@ -41,13 +42,16 @@ swing\txtUser.class
 Main.class
 swing\MyPassword.class
 chat_system\Request_and_Report$2.class
+admin_system\dao\UserAccountDAO.class
 chat_system\ChatHome_FriendList_Search.class
+admin_system\dto\UserAccountDTO.class
 swing\PanelSlide.class
 chat_system\Request_and_Report.class
 chat_system\GroupChat$3.class
 swing\PanelBorder.class
 admin_system\Group$1.class
 chat_system\Login$2.class
+admin_system\bus\UserAccountBUS.class
 admin_system\LoginHistory.class
 chat_system\Unfriend_and_Report$1.class
 chat_system\Request_and_Report$3.class

@@ -1,11 +1,29 @@
 package admin_system;
 
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+
+import admin_system.bus.UserAccountBUS;
+import admin_system.dto.UserAccountDTO;
 
 public class Home extends JPanel {
     private JComboBox<String> comboBox1;
@@ -47,9 +65,26 @@ public class Home extends JPanel {
 
         // Khởi tạo JTable
         String[] columnNames = {"ID", "Username", "Password", "Name", "Email", "Status", "Banned"};
-        Object[][] data = {{"1", "xanh1", "123", "Nguyen Van Xanh", "nvxanh75@gmail.com", "online", "0"}};
+
+        UserAccountBUS userBUS = new UserAccountBUS(); 
+        List<UserAccountDTO> userDTOs = userBUS.getAll(); 
+
+        // Tạo mảng 2D để chứa dữ liệu từ danh sách userDTOs
+        Object[][] data = new Object[userDTOs.size()][columnNames.length];
+
+        for (int i = 0; i < userDTOs.size(); i++) {
+            UserAccountDTO user = userDTOs.get(i);
+            data[i][0] = user.getId();
+            data[i][1] = user.getUsername();
+            data[i][2] = user.getPassword();
+            data[i][3] = user.getFullname();
+            data[i][4] = user.getEmail();
+            data[i][5] = user.isOnOff() ? "Online" : "Offline";
+            data[i][6] = user.isBanned() ? "Yes" : "No";
+        }
+        
         DefaultTableModel model = new DefaultTableModel(data, columnNames);
-        accountList = new JTable(model);
+        JTable accountList = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(accountList);
         contentPanel.add(scrollPane, BorderLayout.CENTER);
 
