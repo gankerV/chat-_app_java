@@ -11,7 +11,7 @@ public class UtilityDAO {
     int portNumber = 3306;
     String dbName = "chat_system";
     String user = "root";
-    String password = "";
+    String password = "3333";
 
     public Connection getConnection() {
         Connection conn = null;
