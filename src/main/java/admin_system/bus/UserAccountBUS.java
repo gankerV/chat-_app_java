@@ -3,7 +3,6 @@ package admin_system.bus;
 import java.util.List;
 
 import admin_system.dao.UserAccountDAO;
-import admin_system.dto.LoginHistoryDTO;
 import admin_system.dto.UserAccountDTO;
 
 public class UserAccountBUS {
@@ -18,6 +17,10 @@ public class UserAccountBUS {
         return userAccountDAO.getAll(orderBy);
     }
 
+    public UserAccountDTO getUserById(int userId) {
+        return userAccountDAO.getUserById(userId);
+    }
+    
     // Lưu người dùng vào cơ sở dữ liệu
     public boolean saveUser(UserAccountDTO userAccount) {
         return userAccountDAO.saveUser(userAccount);
@@ -35,9 +38,6 @@ public class UserAccountBUS {
         return userAccountDAO.banUser(id,isBanned);
     }
 
-    public List<LoginHistoryDTO> viewLoginHistory(int id) {
-        return userAccountDAO.viewLoginHistory(id);
-    }
 
     public List<UserAccountDTO> viewFriends(int id) {
         return userAccountDAO.viewFriends(id);

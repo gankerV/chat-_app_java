@@ -24,6 +24,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import admin_system.bus.UserAccountBUS;
+import admin_system.bus.LoginHistoryBUS;
 import admin_system.dto.LoginHistoryDTO;
 import admin_system.dto.UserAccountDTO;
 
@@ -32,12 +33,15 @@ public class Home extends JPanel {
     private JTable accountList;
     private DefaultTableModel model;
     private UserAccountBUS userBUS;
+    private LoginHistoryBUS loginBUS;
 
     public Home() {
+        // khởi tạo
+        userBUS = new UserAccountBUS();
+        loginBUS = new LoginHistoryBUS();
+
 
         setLayout(new BorderLayout());
-
-
         // Content Panel with Titled Border
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBorder(BorderFactory.createTitledBorder(
@@ -76,7 +80,7 @@ public class Home extends JPanel {
         contentPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Lấy dữ liệu ban đầu và hiển thị
-        userBUS = new UserAccountBUS();// khởi tạo giá trị
+        
         updateTableData(userBUS.getAll("ID"));
         
         comboBox1.addActionListener(new ActionListener() {
@@ -204,7 +208,7 @@ public class Home extends JPanel {
                     int id = (int) model.getValueAt(selectedRow, 0); // ID là kiểu int
         
                     // Gọi hàm viewHistoryLogin của userBUS để lấy lịch sử đăng nhập
-                    List<LoginHistoryDTO> loginHistory = userBUS.viewLoginHistory(id);
+                    List<LoginHistoryDTO> loginHistory = loginBUS.viewLoginHistory(id);
                     
                     if (loginHistory != null && !loginHistory.isEmpty()) {
                         

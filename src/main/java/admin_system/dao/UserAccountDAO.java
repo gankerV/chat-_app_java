@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import admin_system.dto.LoginHistoryDTO;
 import admin_system.dto.UserAccountDTO;
 import connect_db.UtilityDAO;
 
@@ -73,6 +72,59 @@ public class UserAccountDAO {
         return list;
     }
     
+    
+    public UserAccountDTO getUserById(int userId) {
+        UserAccountDTO userAccount = null;
+        UtilityDAO utilityDAO = new UtilityDAO();
+        Connection conn = utilityDAO.getConnection();
+
+        if (conn == null) {
+            return null;
+        }
+
+        // Truy vấn SQL để lấy thông tin người dùng theo userId
+        String query = "SELECT * FROM USER_ACCOUNT WHERE ID = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            // Set giá trị cho tham số userId trong câu lệnh SQL
+            stmt.setInt(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                // Lấy các thông tin người dùng từ ResultSet
+                int id = rs.getInt("ID");
+                String username = rs.getString("USERNAME");
+                String password = rs.getString("PASSWORD");
+                String fullname = rs.getString("FULLNAME");
+                String address = rs.getString("ADDRESS");
+                Date dateOfBirth = rs.getDate("DATE_OF_BIRTH");
+                String gender = rs.getString("GENDER");
+                String email = rs.getString("EMAIL");
+                boolean onOff = rs.getBoolean("ON_OFF");
+                Timestamp createdAt = rs.getTimestamp("CREATED_AT");
+                boolean banned = rs.getBoolean("BANNED");
+
+                // Tạo đối tượng UserAccountDTO từ dữ liệu truy vấn được
+                userAccount = new UserAccountDTO(id, username, password, fullname, address, dateOfBirth, gender, email, onOff, createdAt, banned);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            // Đảm bảo đóng kết nối khi không sử dụng nữa
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+
+        return userAccount;
+    }
+    
+
     public boolean saveUser(UserAccountDTO userAccount) {
         UtilityDAO utilityDAO = new UtilityDAO();
         Connection conn = utilityDAO.getConnection();
@@ -191,45 +243,6 @@ public class UserAccountDAO {
             return false;
         }
     }
-    
-    public List<LoginHistoryDTO> viewLoginHistory(int id) {
-        List<LoginHistoryDTO> loginHistoryList = new ArrayList<>();
-        UtilityDAO utilityDAO = new UtilityDAO();
-        Connection conn = utilityDAO.getConnection();
-
-        if (conn == null) {
-            return loginHistoryList;
-        }
-
-        String query = "SELECT LOGIN_ID, USER_ID, LOGIN_TIME FROM LOGIN_HISTORY WHERE USER_ID = ? ORDER BY LOGIN_TIME DESC";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, id); // Set USER_ID parameter
-
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                int loginId = rs.getInt("LOGIN_ID");
-                int userId = rs.getInt("USER_ID");
-                Timestamp loginTime = rs.getTimestamp("LOGIN_TIME");
-
-                LoginHistoryDTO loginHistoryDTO = new LoginHistoryDTO(loginId, userId, loginTime);
-                loginHistoryList.add(loginHistoryDTO);
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-
-        return loginHistoryList;
-    }
 
     public List<UserAccountDTO> viewFriends(int id) {
         List<UserAccountDTO> friendsList = new ArrayList<>();
@@ -270,5 +283,4 @@ public class UserAccountDAO {
         return friendsList;
     }
     
-
 }
