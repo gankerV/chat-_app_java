@@ -45,7 +45,7 @@ public class NumFriend extends JPanel {
         JTextField searchDateField = new JTextField(15);
         JLabel searchDateLabel = new JLabel("Search by number direct friend:");
 
-// Tạo panel để chứa các thành phần tìm kiếm trong cùng một cột (bên trái)
+        // Tạo panel để chứa các thành phần tìm kiếm trong cùng một cột (bên trái)
         JPanel leftPanel = new JPanel(new GridLayout(2, 2)); // 2 hàng, 2 cột
         leftPanel.add(searchNameLabel);
         leftPanel.add(searchNameField);

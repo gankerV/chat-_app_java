@@ -24,10 +24,10 @@ public class LoginHistoryDAO {
 
         String query = "SELECT LOGIN_ID, USER_ID, LOGIN_TIME FROM LOGIN_HISTORY WHERE USER_ID = ? ORDER BY LOGIN_TIME DESC";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, id); // Set USER_ID parameter
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, id); // Set USER_ID parameter
 
-            ResultSet rs = pstmt.executeQuery();
+            ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 int loginId = rs.getInt("LOGIN_ID");
