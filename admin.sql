@@ -14,6 +14,7 @@ CREATE TABLE USER_ACCOUNT (
     ON_OFF BOOLEAN,
     CREATED_AT TIMESTAMP,
     BANNED BOOLEAN,
+    IS_ADMIN BOOLEAN,
     PRIMARY KEY(ID)
 );
 
@@ -96,11 +97,12 @@ CREATE TABLE REPORT_SPAM (
     FOREIGN KEY(REPORTED_ID) REFERENCES USER_ACCOUNT(ID) ON DELETE CASCADE
 );
 
-INSERT INTO USER_ACCOUNT (USERNAME, PASSWORD, FULLNAME, ADDRESS, DATE_OF_BIRTH, GENDER, EMAIL, ON_OFF, CREATED_AT, BANNED)
+INSERT INTO USER_ACCOUNT (USERNAME, PASSWORD, FULLNAME, ADDRESS, DATE_OF_BIRTH, GENDER, EMAIL, ON_OFF, CREATED_AT, BANNED, IS_ADMIN)
 VALUES 
-('john_doe', 'password123', 'John Doe', '123 Main St', '1990-01-01', 'M', 'john.doe@example.com', TRUE, CURRENT_TIMESTAMP, FALSE),
-('jane_smith', 'password456', 'Jane Smith', '456 Elm St', '1992-02-14', 'F', 'jane.smith@example.com', TRUE, CURRENT_TIMESTAMP, FALSE),
-('alex_jones', 'password789', 'Alex Jones', '789 Oak St', '1988-05-23', 'M', 'alex.jones@example.com', TRUE, CURRENT_TIMESTAMP, TRUE);
+('john_doe', 'password123', 'John Doe', '123 Main St', '1990-01-01', 'M', 'john.doe@example.com', TRUE, CURRENT_TIMESTAMP, FALSE, TRUE),
+('jane_smith', 'password456', 'Jane Smith', '456 Elm St', '1992-02-14', 'F', 'jane.smith@example.com', TRUE, CURRENT_TIMESTAMP, FALSE, TRUE),
+('alex_jones', 'password789', 'Alex Jones', '789 Oak St', '1988-05-23', 'M', 'alex.jones@example.com', TRUE, CURRENT_TIMESTAMP, TRUE, TRUE),
+('gankerV', '123', 'Nguyễn Văn Xanh', '123 Nhà Trắng Quận 1', '2004-01-01', 'M', 'nvxanh75@gmail.com', TRUE, '2024-01-01 12:05:37.0', TRUE, TRUE);
 
 
 INSERT INTO USER_FRIEND (ID, FRIEND_ID)
@@ -131,7 +133,8 @@ INSERT INTO LOGIN_HISTORY (USER_ID, LOGIN_TIME)
 VALUES
 (1, CURRENT_TIMESTAMP),
 (2, CURRENT_TIMESTAMP),
-(3, CURRENT_TIMESTAMP);
+(3, CURRENT_TIMESTAMP),
+(4, '2024-12-10 12:05:37.0');
 
 
 INSERT INTO MESSAGE_USER (FROM_USER, TO_USER, SEND_AT, CONTENT, VISIBLE_ONLY)

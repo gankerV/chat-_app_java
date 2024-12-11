@@ -17,7 +17,16 @@ public class adminui extends JFrame {
     private CardLayout cardLayout;
     private JPanel listPanel;
 
-    public adminui() {
+    private static int userId; // Biến tĩnh để lưu userId
+
+    public static int getUserId() {
+        return userId; // NumFriend dùng để lấy id
+    }
+
+    public adminui(int userId) {
+
+        adminui.userId = userId;
+
         setTitle("Admin UI");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1000, 700);
@@ -114,8 +123,5 @@ public class adminui extends JFrame {
         setContentPane(mainPanel);
         setVisible(true);
     }
-
-
-
     
 }

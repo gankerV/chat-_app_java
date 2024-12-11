@@ -10,8 +10,8 @@ import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -106,7 +106,7 @@ public class NewRegistration extends JPanel {
         contentPanel.add(timePanel, BorderLayout.CENTER);
 
         // Khởi tạo JTable
-        String[] columnNames = {"ID", "Username", "Name", "Email", "Status", "Banned"};
+        String[] columnNames = {"ID", "Username", "Name", "Email", "Status", "Created at","Banned"};
         model = new DefaultTableModel(columnNames, 0);
         accountList = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(accountList);
@@ -155,10 +155,31 @@ public class NewRegistration extends JPanel {
             }
         });
         
-        chartButton.addActionListener(e -> {
-            showChartPanel();
+        chartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                int rowCount = model.getRowCount();
+        
+                // Lưu trữ dữ liệu thời gian createdAt
+                List<Timestamp> createdAtList = new ArrayList<>();
+                
+                // Duyệt qua từng dòng của JTable và lấy dữ liệu Created At
+                for (int i = 0; i < rowCount; i++) {
+                    Timestamp createdAt = (Timestamp) model.getValueAt(i, 5);  // Cột Created At
+        
+                    if (createdAt != null) {
+                        // Thêm thời gian đăng ký vào danh sách
+                        createdAtList.add(createdAt);
+                    }
+                }
+        
+                // Gọi hàm để vẽ biểu đồ, truyền danh sách thời gian đăng ký
+                showChartPanel(createdAtList);
+            }
         });
     }
+
 
     private void updateTableData(List<UserAccountDTO> userDTOs) {
         // Xóa tất cả các dòng cũ trong model
@@ -172,34 +193,36 @@ public class NewRegistration extends JPanel {
                 user.getFullname(),
                 user.getEmail(),
                 user.isOnOff() ? "Online" : "Offline",
+                user.getCreatedAt(),
                 user.isBanned() ? "Yes" : "No"
+                
             };
             model.addRow(row);
         }
     }
 
-    private void showChartPanel() {
+    private void showChartPanel(List<Timestamp> createdAtList) {
         // Tạo panel chứa JTextField để nhập năm
         JPanel inputPanel = new JPanel();
         JLabel yearLabel = new JLabel("Enter Year:");
         JTextField yearField = new JTextField(10);
-
+    
         inputPanel.add(yearLabel);
         inputPanel.add(yearField);
-
+    
         // Tạo JFrame để chứa inputPanel
         JFrame chartFrame = new JFrame("Registration Chart");
         chartFrame.setLayout(new BorderLayout());
         chartFrame.setSize(800, 600);
         chartFrame.setLocationRelativeTo(null);
-
+    
         // Thêm inputPanel vào phía trên (North) của chartFrame
         chartFrame.add(inputPanel, BorderLayout.NORTH);
-
+    
         // Tạo ChartPanel trống để chứa biểu đồ (sẽ được cập nhật sau khi người dùng nhập năm)
         JPanel chartContainer = new JPanel();
         chartFrame.add(chartContainer, BorderLayout.CENTER);
-
+    
         // Thêm listener khi người dùng nhập vào trường năm (yearField)
         yearField.addActionListener(e -> {
             String yearInput = yearField.getText();
@@ -207,7 +230,7 @@ public class NewRegistration extends JPanel {
                 try {
                     int year = Integer.parseInt(yearInput); // Chuyển đổi năm từ chuỗi sang số nguyên
                     // Hiển thị biểu đồ với năm người dùng nhập
-                    showBarChart(chartContainer, year);
+                    showBarChart(chartContainer, createdAtList, year);
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(chartFrame, "Please enter a valid year.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                 }
@@ -215,33 +238,44 @@ public class NewRegistration extends JPanel {
                 JOptionPane.showMessageDialog(chartFrame, "Please enter a year.", "Empty Input", JOptionPane.WARNING_MESSAGE);
             }
         });
-
+    
         chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         chartFrame.setVisible(true);
     }
 
-    private void showBarChart(JPanel chartContainer, int year) {
-        // Dữ liệu giả lập cho biểu đồ
+    private void showBarChart(JPanel chartContainer, List<Timestamp> createdAtList, int year) {
+        // Dữ liệu cho biểu đồ
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        Random random = new Random();
-
-        for (int month = 1; month <= 12; month++) {
-            int value = random.nextInt(50); // Số lượng người đăng ký ngẫu nhiên
-            dataset.addValue(value, "Registrations", "Month " + month);
+    
+        // Mảng chứa số lượng đăng ký mỗi tháng
+        int[] monthlyRegistrations = new int[12];  // 12 tháng trong năm
+    
+        // Lặp qua danh sách userList để tính số lượng đăng ký mỗi tháng
+        for (Timestamp time : createdAtList) {
+            int accountYear = time.toLocalDateTime().getYear();
+            if (accountYear == year) {
+                int month = time.toLocalDateTime().getMonthValue();  // Lấy tháng
+                monthlyRegistrations[month - 1]++;  // Tăng số lượng đăng ký cho tháng đó
+            }
         }
-
-        // Tạo biểu đồ
+    
+        // Thêm dữ liệu vào dataset để vẽ biểu đồ
+        for (int month = 0; month < 12; month++) {
+            dataset.addValue(monthlyRegistrations[month], "Registrations", "Month " + (month + 1));
+        }
+    
+        // Tạo biểu đồ cột
         JFreeChart barChart = ChartFactory.createBarChart(
-                "New Registrations in " + year,
-                "Month",
-                "Number of Registrations",
-                dataset
+                "New Registrations in " + year,  // Tiêu đề biểu đồ
+                "Month",  // Trục X
+                "Number of Registrations",  // Trục Y
+                dataset  // Dữ liệu
         );
-
+    
         // Tạo ChartPanel từ biểu đồ
         ChartPanel chartPanel = new ChartPanel(barChart);
         chartPanel.setPreferredSize(new Dimension(800, 600));
-
+    
         // Xóa biểu đồ hiện tại trong chartContainer nếu có
         chartContainer.removeAll();
         chartContainer.add(chartPanel, BorderLayout.CENTER);

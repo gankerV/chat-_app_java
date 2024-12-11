@@ -10,10 +10,9 @@ public class UserAccountBUS {
     private UserAccountDAO userAccountDAO;
 
     public UserAccountBUS() {
-        userAccountDAO = new UserAccountDAO();
+        this.userAccountDAO = new UserAccountDAO();
     }
 
-    // Lấy danh sách tất cả người dùng
     public List<UserAccountDTO> getAll(String orderBy) {
         return userAccountDAO.getAll(orderBy);
     }
@@ -26,7 +25,6 @@ public class UserAccountBUS {
         return userAccountDAO.getUserByTimes(startTime,endTime,selectedOrder,username);
     }
     
-    // Lưu người dùng vào cơ sở dữ liệu
     public boolean saveUser(UserAccountDTO userAccount) {
         return userAccountDAO.saveUser(userAccount);
     }
@@ -43,11 +41,10 @@ public class UserAccountBUS {
         return userAccountDAO.banUser(id,isBanned);
     }
 
-
     public List<UserAccountDTO> viewFriends(int id) {
         return userAccountDAO.viewFriends(id);
     }
-
+    
 }
 
     
