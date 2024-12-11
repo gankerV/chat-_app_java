@@ -1,21 +1,51 @@
 package admin_system;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Random;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.Random;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import admin_system.bus.UserAccountBUS;
+import admin_system.dto.UserAccountDTO;
 public class NewRegistration extends JPanel {
     private JComboBox<String> comboBox1;
     private JTable accountList;
-
+    private DefaultTableModel model;
+    private UserAccountBUS userBUS;
+    private String selectedOrder;
+    private String username;
+    
     public NewRegistration() {
+
+        userBUS = new UserAccountBUS();
+        
         setLayout(new BorderLayout());
 
         JPanel contentPanel = new JPanel();
@@ -41,7 +71,8 @@ public class NewRegistration extends JPanel {
         topPanel.add(leftPanel, BorderLayout.WEST);
 
         JLabel orderLabel = new JLabel("Order by:");
-        comboBox1 = new JComboBox<>(new String[]{"Tên đăng nhập", "Ngày tạo"});
+        comboBox1 = new JComboBox<>(new String[]{"Username", "Created at"});
+        selectedOrder = comboBox1.getItemAt(0); // mặc định kiểu sắp xếp
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.add(orderLabel);
         rightPanel.add(comboBox1);
@@ -74,22 +105,79 @@ public class NewRegistration extends JPanel {
 
         contentPanel.add(timePanel, BorderLayout.CENTER);
 
+        // Khởi tạo JTable
+        String[] columnNames = {"ID", "Username", "Name", "Email", "Status", "Banned"};
+        model = new DefaultTableModel(columnNames, 0);
+        accountList = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(accountList);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
+        add(contentPanel, BorderLayout.CENTER);
+
+        comboBox1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Lấy giá trị được chọn trong JComboBox
+                selectedOrder = (String) comboBox1.getSelectedItem();
+            }
+        });
+
+        searchField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                username = searchField.getText().trim(); // trim để loại bỏ khoảng trắng của chuỗi
+            }
+        });
+
+        filterButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // Parse input dates
+                    String startDateText = startDateField.getText().trim();
+                    String endDateText = endDateField.getText().trim();
+
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Timestamp startTime = new Timestamp(dateFormat.parse(startDateText).getTime());
+                    Timestamp endTime = new Timestamp(dateFormat.parse(endDateText).getTime());
+
+                    // Fetch user list
+                    List<UserAccountDTO> users = userBUS.getUserByTimes(startTime, endTime,selectedOrder,username);
+
+                    // Update table
+                    updateTableData(users);
+
+                } catch (IllegalArgumentException | ParseException ex) {
+                    ex.printStackTrace();
+                    // Nếu có lỗi về định dạng ngày giờ, thông báo cho người dùng
+                    System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm:ss.");
+                }
+            }
+        });
+        
         chartButton.addActionListener(e -> {
             showChartPanel();
         });
-
-        // Khởi tạo JTable
-        String[] columnNames = {"ID", "Tên đăng nhập", "Ngày tạo"};
-        Object[][] data = {{"1", "Xanh1", "2024-11-15"}};
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
-        accountList = new JTable(model);
-        JScrollPane scrollPane = new JScrollPane(accountList);
-
-        contentPanel.add(scrollPane);
-
-        add(contentPanel, BorderLayout.CENTER);
     }
+
+    private void updateTableData(List<UserAccountDTO> userDTOs) {
+        // Xóa tất cả các dòng cũ trong model
+        model.setRowCount(0);
+
+        // Thêm dữ liệu mới vào model
+        for (UserAccountDTO user : userDTOs) {
+            Object[] row = {
+                user.getId(),
+                user.getUsername(),
+                user.getFullname(),
+                user.getEmail(),
+                user.isOnOff() ? "Online" : "Offline",
+                user.isBanned() ? "Yes" : "No"
+            };
+            model.addRow(row);
+        }
+    }
+
     private void showChartPanel() {
         // Tạo panel chứa JTextField để nhập năm
         JPanel inputPanel = new JPanel();

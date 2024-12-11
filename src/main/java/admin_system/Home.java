@@ -23,8 +23,8 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
-import admin_system.bus.UserAccountBUS;
 import admin_system.bus.LoginHistoryBUS;
+import admin_system.bus.UserAccountBUS;
 import admin_system.dto.LoginHistoryDTO;
 import admin_system.dto.UserAccountDTO;
 
@@ -82,16 +82,6 @@ public class Home extends JPanel {
         // Lấy dữ liệu ban đầu và hiển thị
         
         updateTableData(userBUS.getAll("ID"));
-        
-        comboBox1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Lấy giá trị được chọn trong JComboBox
-                String selectedOrder = (String) comboBox1.getSelectedItem();
-                // Gọi hàm getAll với giá trị được chọn và cập nhật dữ liệu
-                updateTableData(userBUS.getAll(selectedOrder));
-            }
-        });
 
         // Tạo buttonPanel chứa các nút
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -116,6 +106,17 @@ public class Home extends JPanel {
             }
         });
 
+        add(contentPanel, BorderLayout.CENTER);
+
+        comboBox1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Lấy giá trị được chọn trong JComboBox
+                String selectedOrder = (String) comboBox1.getSelectedItem();
+                // Gọi hàm getAll với giá trị được chọn và cập nhật dữ liệu
+                updateTableData(userBUS.getAll(selectedOrder));
+            }
+        });
         // Thêm nút cho bảng
         addButton.addActionListener(e -> showAddDialog(model,userBUS));
 
@@ -244,9 +245,6 @@ public class Home extends JPanel {
                 }
             }
         });
-        
-
-        add(contentPanel, BorderLayout.CENTER);
     }
 
     private void updateTableData(List<UserAccountDTO> userDTOs) {

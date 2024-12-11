@@ -1,5 +1,6 @@
 package admin_system.bus;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import admin_system.dao.UserAccountDAO;
@@ -19,6 +20,10 @@ public class UserAccountBUS {
 
     public UserAccountDTO getUserById(int userId) {
         return userAccountDAO.getUserById(userId);
+    }
+
+    public List<UserAccountDTO> getUserByTimes(Timestamp startTime,Timestamp endTime, String selectedOrder, String username) {
+        return userAccountDAO.getUserByTimes(startTime,endTime,selectedOrder,username);
     }
     
     // Lưu người dùng vào cơ sở dữ liệu

@@ -72,7 +72,6 @@ public class UserAccountDAO {
         return list;
     }
     
-    
     public UserAccountDTO getUserById(int userId) {
         UserAccountDTO userAccount = null;
         UtilityDAO utilityDAO = new UtilityDAO();
@@ -123,8 +122,80 @@ public class UserAccountDAO {
 
         return userAccount;
     }
-    
 
+    public List<UserAccountDTO> getUserByTimes(Timestamp startTime, Timestamp endTime, String orderBy, String username) {
+        List<UserAccountDTO> userList = new ArrayList<>();
+        UtilityDAO utilityDAO = new UtilityDAO();
+        Connection conn = utilityDAO.getConnection();
+    
+        // Kiểm tra kết nối
+        if (conn == null) {
+            return userList; // Nếu không thể kết nối, trả về danh sách rỗng
+        }
+    
+        String orderByColumn;
+        switch (orderBy) {
+            case "Username":
+                orderByColumn = "USERNAME";
+                break;
+            case "Created at":
+                orderByColumn = "CREATED_AT";
+                break;
+            default:
+                orderByColumn = "ID";
+                break;
+        }
+    
+        // Khởi tạo câu truy vấn
+        String query = "SELECT ID, USERNAME, PASSWORD, FULLNAME, ADDRESS, DATE_OF_BIRTH, GENDER, EMAIL, ON_OFF, CREATED_AT, BANNED " +
+                       "FROM USER_ACCOUNT " +
+                       "WHERE CREATED_AT BETWEEN ? AND ? ";
+    
+        // Thêm điều kiện tìm kiếm theo username nếu có
+        if (username != null && !username.trim().isEmpty()) {
+            query += "AND USERNAME LIKE ? "; // Sử dụng LIKE để tìm kiếm phần trăm khớp
+        }
+    
+        // Thêm điều kiện sắp xếp
+        query += "ORDER BY " + orderByColumn;
+    
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setTimestamp(1, startTime);  // Gán giá trị startTime vào câu truy vấn
+            stmt.setTimestamp(2, endTime);    // Gán giá trị endTime vào câu truy vấn
+    
+            // Nếu có giá trị tìm kiếm username, gán giá trị cho tham số tiếp theo
+            if (username != null && !username.trim().isEmpty()) {
+                stmt.setString(3, "%" + username + "%");  // Tìm kiếm username chứa chuỗi nhập vào
+            }
+    
+            ResultSet rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                // Lấy dữ liệu từ ResultSet
+                int id = rs.getInt("ID");
+                String userName = rs.getString("USERNAME");
+                String password = rs.getString("PASSWORD");
+                String fullname = rs.getString("FULLNAME");
+                String address = rs.getString("ADDRESS");
+                Date dateOfBirth = rs.getDate("DATE_OF_BIRTH");
+                String gender = rs.getString("GENDER");
+                String email = rs.getString("EMAIL");
+                boolean onOff = rs.getBoolean("ON_OFF");
+                Timestamp createdAt = rs.getTimestamp("CREATED_AT");
+                boolean banned = rs.getBoolean("BANNED");
+    
+                // Tạo đối tượng UserAccountDTO và thêm vào danh sách
+                UserAccountDTO userAccount = new UserAccountDTO(id, userName, password, fullname, address, dateOfBirth, gender, email, onOff, createdAt, banned);
+                userList.add(userAccount);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return userList;
+    }
+    
+    
     public boolean saveUser(UserAccountDTO userAccount) {
         UtilityDAO utilityDAO = new UtilityDAO();
         Connection conn = utilityDAO.getConnection();
