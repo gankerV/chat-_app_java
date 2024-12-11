@@ -1,0 +1,8 @@
+# Bỏ qua tất cả các tệp .class
+*.class
+
+# Bỏ qua tất cả các tệp .form
+*.form
+
+# Bỏ qua tất cả các tệp .lst
+*.lst
