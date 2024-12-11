@@ -8,7 +8,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import admin_system.AdminMain;
 import chat_system.UserMain;
 import login_system.LoginScreen;
 
@@ -52,7 +51,8 @@ public class Main {
         // Xử lý sự kiện cho nút Admin
         adminButton.addActionListener(e -> {
             frame.dispose(); // Đóng giao diện chính
-            AdminMain.main(new String[]{String.valueOf(userId)}); // Truyền userId qua args
+            //AdminMain.main(new String[]{String.valueOf(userId)});
+            UserMain.main(new String[]{}); 
         });
 
         // Xử lý sự kiện cho nút Chat
