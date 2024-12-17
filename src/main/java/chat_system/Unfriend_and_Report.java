@@ -1,18 +1,35 @@
 package chat_system;
 
+import chat_system.dao.GroupChatDAO;
 import swing.txtUser;
 
 import java.sql.SQLException;
+import java.util.List;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 
 import chat_system.dao.UserAccountDAO;
 import chat_system.dto.User;
+import chat_system.dto.GroupChat;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Unfriend_and_Report extends javax.swing.JPanel {
 
-    private String currentUserID;  // ID của người dùng hiện tại
-    private User selectedUser;     // Thống tin người dùng bằn cần xóa quan hệ
+    private final String currentUserID;  // ID của người dùng hiện tại
+    private final User selectedUser;     // Thống tin người dùng bằn cần xóa quan hệ
     public Unfriend_and_Report( String currentUserID, User selectedUser) {    
         initComponents();
 
@@ -44,7 +61,7 @@ public class Unfriend_and_Report extends javax.swing.JPanel {
         txtEmail = new javax.swing.JLabel();
         spam_Button = new swing.MyButton();
         block_Button = new swing.MyButton();
-        jButton1 = new javax.swing.JButton();
+        add_group_button = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
@@ -84,7 +101,12 @@ public class Unfriend_and_Report extends javax.swing.JPanel {
             }
         });
 
-        jButton1.setText("Create Group");
+        add_group_button.setText("Add Group");
+        add_group_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                add_group_buttonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -99,7 +121,7 @@ public class Unfriend_and_Report extends javax.swing.JPanel {
                     .addComponent(unFriend_Button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(spam_Button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(block_Button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(add_group_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(44, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -114,7 +136,7 @@ public class Unfriend_and_Report extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(unFriend_Button, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
+                .addComponent(add_group_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 67, Short.MAX_VALUE)
                 .addComponent(spam_Button, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -228,10 +250,85 @@ public class Unfriend_and_Report extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_block_ButtonActionPerformed
 
+    private void add_group_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_group_buttonActionPerformed
+        try {
+            // Create a JDialog for selecting or creating groups
+            JDialog groupDialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Select or Create Group", JDialog.ModalityType.APPLICATION_MODAL);
+
+            GroupChatDAO groupChatDao = new GroupChatDAO();
+            DefaultListModel<GroupChat> groupListModel = new DefaultListModel<>();
+            List<GroupChat> groups = groupChatDao.getGroupsByUserId(Integer.parseInt(this.currentUserID));
+            for (GroupChat groupChat : groups) {  
+                groupListModel.addElement(groupChat);
+            }
+
+            JList<GroupChat> groupList = new JList<>(groupListModel);
+            groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+            // Add components to the dialog
+            groupDialog.setLayout(new BorderLayout());
+            groupDialog.add(new JScrollPane(groupList), BorderLayout.CENTER);
+
+            // Panel for buttons
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+            // Confirm button
+            JButton confirmButton = new JButton("Confirm");
+            confirmButton.addActionListener(e -> {
+                GroupChat selectedGroup = groupList.getSelectedValue();
+                if (selectedGroup != null) {
+                    boolean success = groupChatDao.addUserToGroup(selectedGroup.getId(), this.selectedUser.getId());
+                    // Kiểm tra kết quả và hiển thị thông báo
+                    if (success) {
+                        JOptionPane.showMessageDialog(groupDialog, "User successfully added to the group " + selectedGroup.getName());
+                    } else {
+                        JOptionPane.showMessageDialog(groupDialog, "User is already a member of the group " + selectedGroup.getName());
+                    }
+                    groupDialog.dispose();
+                    
+                } else {
+                    JOptionPane.showMessageDialog(groupDialog, "Please select a group.");
+                }
+            });
+            buttonPanel.add(confirmButton);
+
+            // Create Group button
+            JButton createGroupButton = new JButton("Create Group");
+            createGroupButton.addActionListener(e -> {
+                // Show a dialog for creating a new group
+                String newGroupName = JOptionPane.showInputDialog(groupDialog, "Enter new group name:", "Create Group", JOptionPane.PLAIN_MESSAGE);
+                if (newGroupName != null && !newGroupName.trim().isEmpty()) {
+                    boolean success = groupChatDao.createGroup(newGroupName, Integer.parseInt(this.currentUserID), this.selectedUser.getId());
+                    if (success) {
+                        // Nếu tạo nhóm thành công
+                        JOptionPane.showMessageDialog(groupDialog, "Group \"" + newGroupName + "\" created successfully!");
+                        groupListModel.addElement(new GroupChat(0, newGroupName)); // Add the new group to the list
+                    } else {
+                        // Nếu tạo nhóm thất bại
+                        JOptionPane.showMessageDialog(groupDialog, "Failed to create group. Please try again.");
+                    }
+                    
+                } else if (newGroupName != null) {
+                    JOptionPane.showMessageDialog(groupDialog, "Group name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            buttonPanel.add(createGroupButton);
+
+            groupDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+            groupDialog.setSize(400, 300);
+            groupDialog.setLocationRelativeTo(this); // Center the dialog relative to the current panel
+            groupDialog.setVisible(true);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_add_group_buttonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton add_group_button;
     private swing.MyButton block_Button;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel2;
     private swing.MyButton spam_Button;
     private javax.swing.JLabel txtEmail;

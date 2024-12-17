@@ -11,7 +11,7 @@ import connect_db.UtilityDAO;
 import chat_system.dto.GroupChat;
 
 public class GroupChatDAO {
-    private static Connection conn;
+    private Connection conn;
 
     public GroupChatDAO() {
         UtilityDAO utilityDAO = new UtilityDAO();
@@ -43,23 +43,27 @@ public class GroupChatDAO {
     }
 
     // Thêm user vào group
-    public static void addUserToGroup(int groupId, int userId) throws SQLException {
+    public boolean addUserToGroup(int groupId, int userId) {
         String query = "INSERT INTO GROUPCHAT_MEMBER (GROUPCHAT_ID, MEMBER_ID, POSITION) VALUES (?, ?, 'Member');";
 
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, groupId);
             stmt.setInt(2, userId);
             stmt.executeUpdate();
+            return true;  // Return true if the operation is successful
+        } catch (SQLException e) {
+            e.printStackTrace();  // Optionally log the exception
+            return false;  // Return false if there's an error
         }
     }
 
     // Tạo group mới và thêm admin cùng thành viên đầu tiên
-    public static void createGroup(String groupName, int adminId, int memberId) throws SQLException {
+    public  boolean createGroup(String groupName, int adminId, int memberId) {
         String query1 = "INSERT INTO GROUPCHAT (GROUP_NAME, CREATED_AT) VALUES (?, CURRENT_TIMESTAMP);";
         String query2 = """
             INSERT INTO GROUPCHAT_MEMBER (GROUPCHAT_ID, MEMBER_ID, POSITION)
             VALUES (LAST_INSERT_ID(), ?, 'Admin'),
-                   (LAST_INSERT_ID(), ?, 'Member');
+                (LAST_INSERT_ID(), ?, 'Member');
         """;
 
         try (PreparedStatement stmt1 = conn.prepareStatement(query1);
@@ -73,13 +77,17 @@ public class GroupChatDAO {
             stmt2.setInt(2, memberId);
             stmt2.executeUpdate();
 
-            conn.commit();
+            return true;  // Return true if the operation is successful
         } catch (SQLException e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            conn.setAutoCommit(true);
-        }  
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            e.printStackTrace();  // Optionally log the exception
+            return false;  // Return false if there's an error
+        } 
     }
+
     
 }
