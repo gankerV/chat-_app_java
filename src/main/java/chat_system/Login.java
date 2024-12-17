@@ -1,6 +1,13 @@
 package chat_system;
 
+import chat_system.dao.UserAccountDAO;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 public class Login extends javax.swing.JPanel {
     public Login() {
@@ -8,7 +15,7 @@ public class Login extends javax.swing.JPanel {
     }
 
     public void login() {
-        txtUser.grabFocus();
+        txtEmail.grabFocus();
     }
 
     public void addEventRegister(ActionListener event) {
@@ -18,10 +25,8 @@ public class Login extends javax.swing.JPanel {
     public void addEventForgot_password(ActionListener event) {
         cmdForgot_password.addActionListener(event);
     }
+
     
-    public void addEventHome(ActionListener event) {
-        cmdChatHome.addActionListener(event);
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -32,32 +37,44 @@ public class Login extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        txtUser = new swing.MyTextField();
+        txtEmail = new swing.MyTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtPass = new swing.MyPassword();
         jLabel3 = new javax.swing.JLabel();
-        cmdChatHome = new swing.MyButton();
+        login_ChatHome = new swing.MyButton();
         cmdForgot_password = new javax.swing.JButton();
         cmdRegister = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setText("User Name");
+        txtEmail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtEmailActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Email");
 
         jLabel2.setFont(new java.awt.Font("sansserif", 1, 48)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(69, 68, 68));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Login");
 
+        txtPass.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPassActionPerformed(evt);
+            }
+        });
+
         jLabel3.setText("Password");
 
-        cmdChatHome.setBackground(new java.awt.Color(255, 0, 0));
-        cmdChatHome.setForeground(new java.awt.Color(40, 40, 40));
-        cmdChatHome.setText("Login");
-        cmdChatHome.addActionListener(new java.awt.event.ActionListener() {
+        login_ChatHome.setBackground(new java.awt.Color(255, 0, 0));
+        login_ChatHome.setForeground(new java.awt.Color(40, 40, 40));
+        login_ChatHome.setText("Login");
+        login_ChatHome.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdChatHomeActionPerformed(evt);
+                login_ChatHomeActionPerformed(evt);
             }
         });
 
@@ -66,6 +83,11 @@ public class Login extends javax.swing.JPanel {
         cmdForgot_password.setText("Forgot password?");
         cmdForgot_password.setContentAreaFilled(false);
         cmdForgot_password.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        cmdForgot_password.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdForgot_passwordActionPerformed(evt);
+            }
+        });
 
         cmdRegister.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
         cmdRegister.setForeground(new java.awt.Color(30, 122, 236));
@@ -87,10 +109,10 @@ public class Login extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel3)
                     .addComponent(jLabel1)
-                    .addComponent(txtUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
                     .addComponent(txtPass, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(cmdChatHome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(login_ChatHome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cmdForgot_password, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cmdRegister, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(50, Short.MAX_VALUE))
@@ -98,19 +120,19 @@ public class Login extends javax.swing.JPanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(26, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
-                .addComponent(cmdChatHome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
+                .addComponent(login_ChatHome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
                 .addComponent(cmdForgot_password)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdRegister)
@@ -118,23 +140,71 @@ public class Login extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void cmdForgot_passwordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdForgot_passwordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmdForgot_passwordActionPerformed
+
+    private void login_ChatHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_login_ChatHomeActionPerformed
+        // TODO add your handling code here:
+        String email = txtEmail.getText();
+        String password = new String(txtPass.getPassword());  // Use getPassword for JPasswordField
+
+        // Gọi DAO để xác thực người dùng
+        UserAccountDAO dao = new UserAccountDAO();
+        boolean isValid = dao.validateUser(email, password);
+
+        if (isValid) {
+            try {
+                JOptionPane.showMessageDialog(this, "Login successful!");
+                String id = dao.getUserIdByEmail(email);
+                // Cập nhật trạng thái ON_OFF thành TRUE
+                boolean isUpdated = dao.updateUserStatus(id, true);
+                if (isUpdated) {
+                    System.out.println("User ON_OFF status updated to TRUE.");
+                } else {
+                    System.out.println("Failed to update ON_OFF status.");
+                }
+                
+                // Mở ChatHome dưới dạng JFrame mới
+                ChatHome chatHome = new ChatHome();
+                chatHome.setCurrentUserID(id);
+                chatHome.setVisible(true);
+                
+                // Ẩn JFrame hiện tại
+                JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                if (currentFrame != null) {
+                    currentFrame.setVisible(false);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+            }
+           
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid email or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_login_ChatHomeActionPerformed
+
+    private void txtEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEmailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEmailActionPerformed
+
+    private void txtPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPassActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPassActionPerformed
+
     private void cmdRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRegisterActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmdRegisterActionPerformed
-
-    private void cmdChatHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdChatHomeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cmdChatHomeActionPerformed
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private swing.MyButton cmdChatHome;
     private javax.swing.JButton cmdForgot_password;
     private javax.swing.JButton cmdRegister;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private swing.MyButton login_ChatHome;
+    private swing.MyTextField txtEmail;
     private swing.MyPassword txtPass;
-    private swing.MyTextField txtUser;
     // End of variables declaration//GEN-END:variables
 }
