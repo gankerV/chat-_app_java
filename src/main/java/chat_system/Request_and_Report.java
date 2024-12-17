@@ -1,21 +1,28 @@
 package chat_system;
 
 import swing.txtUser;
-import java.awt.event.ActionListener;
+import chat_system.dao.UserAccountDAO;
+import chat_system.dto.User;
 
 public class Request_and_Report extends javax.swing.JPanel {
-    public Request_and_Report() {
+    private final String currentUserID;  // ID của người dùng hiện tại
+    private final User selectedUser;     // Thống tin người dùng bằn cần xóa quan hệ
+
+    public Request_and_Report( String currentUserID, User selectedUser) {
         initComponents();
+
+        this.currentUserID = currentUserID;  // Lưu lại currentUserID
+        this.selectedUser = selectedUser;    // Lưu lại selectedUser
+
+        txtUsername.setText("Username: " + selectedUser.getUsername());
+        txtEmail.setText("Email: " + selectedUser.getEmail());
     }
 
     public void register() {
         txtUser.grabFocus();
     }
 
-    public void addEventBackLogin(ActionListener event) {
-        cmdBackLogin.addActionListener(event);
-    }
-
+ 
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -25,66 +32,38 @@ public class Request_and_Report extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        txtUsername = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        myButton1 = new swing.MyButton();
-        cmdBackLogin = new javax.swing.JButton();
-        jLabel5 = new javax.swing.JLabel();
-        myButton2 = new swing.MyButton();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jLabel6 = new javax.swing.JLabel();
-        myButton3 = new swing.MyButton();
+        addFriend_Button = new swing.MyButton();
+        txtEmail = new javax.swing.JLabel();
+        block_Button = new swing.MyButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setText("User Name");
+        txtUsername.setText("User Name");
 
         jLabel2.setFont(new java.awt.Font("sansserif", 1, 48)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(69, 68, 68));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Avatar");
+        jLabel2.setText("Not Friend");
 
-        myButton1.setBackground(new java.awt.Color(255, 0, 0));
-        myButton1.setForeground(new java.awt.Color(40, 40, 40));
-        myButton1.setText("Add friend");
-        myButton1.addActionListener(new java.awt.event.ActionListener() {
+        addFriend_Button.setBackground(new java.awt.Color(255, 0, 0));
+        addFriend_Button.setForeground(new java.awt.Color(40, 40, 40));
+        addFriend_Button.setText("Add friend");
+        addFriend_Button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                myButton1ActionPerformed(evt);
+                addFriend_ButtonActionPerformed(evt);
             }
         });
 
-        cmdBackLogin.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
-        cmdBackLogin.setForeground(new java.awt.Color(30, 122, 236));
-        cmdBackLogin.setText("Back to Home");
-        cmdBackLogin.setContentAreaFilled(false);
-        cmdBackLogin.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        txtEmail.setText("Email");
 
-        jLabel5.setText("Email");
-
-        myButton2.setBackground(new java.awt.Color(0, 0, 0));
-        myButton2.setForeground(new java.awt.Color(255, 255, 255));
-        myButton2.setText("Report");
-        myButton2.addActionListener(new java.awt.event.ActionListener() {
+        block_Button.setBackground(new java.awt.Color(0, 0, 0));
+        block_Button.setForeground(new java.awt.Color(255, 255, 255));
+        block_Button.setText("Block");
+        block_Button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                myButton2ActionPerformed(evt);
-            }
-        });
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
-            }
-        });
-
-        jLabel6.setText("Please select a problem to Report");
-
-        myButton3.setBackground(new java.awt.Color(0, 0, 0));
-        myButton3.setForeground(new java.awt.Color(255, 255, 255));
-        myButton3.setText("Block");
-        myButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                myButton3ActionPerformed(evt);
+                block_ButtonActionPerformed(evt);
             }
         });
 
@@ -94,17 +73,12 @@ public class Request_and_Report extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(50, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jLabel5)
-                        .addComponent(jLabel1)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
-                        .addComponent(myButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cmdBackLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(myButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(myButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtEmail)
+                    .addComponent(txtUsername)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
+                    .addComponent(addFriend_Button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(block_Button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(50, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -113,51 +87,99 @@ public class Request_and_Report extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(myButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
-                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(myButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(myButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(126, 126, 126)
-                .addComponent(cmdBackLogin)
-                .addGap(30, 30, 30))
+                .addComponent(addFriend_Button, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 143, Short.MAX_VALUE)
+                .addComponent(block_Button, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(179, 179, 179))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void myButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton1ActionPerformed
+    private void addFriend_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFriend_ButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_myButton1ActionPerformed
+        // Hiển thị thông báo xác nhận
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 
+        "Are you sure you want to send a friend request to " + selectedUser.getUsername() + "?", 
+        "Confirm Friend Request", 
+        javax.swing.JOptionPane.YES_NO_OPTION);
 
-    private void myButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_myButton2ActionPerformed
+        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+            try {
+                UserAccountDAO userDao = new UserAccountDAO();
+                boolean success = userDao.sendFriendRequest(Integer.parseInt(this.currentUserID), this.selectedUser.getId());
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
+                if (success) {
+                    javax.swing.JOptionPane.showMessageDialog(this, 
+                            "Friend request sent successfully to " + selectedUser.getUsername() + "!", 
+                            "Success", 
+                            javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                    // Cập nhật trạng thái giao diện nếu cần (ví dụ: disable nút Add Friend)
+                    addFriend_Button.setEnabled(false);
+                    jLabel2.setText("Request Sent");
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(this, 
+                            "Failed to send friend request. Bạn đã bị Unfriend hoặc bị Rejected hoặc đang có Request chờ đồng ý.", 
+                            "Error", 
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, 
+                        "An error occurred: " + e.getMessage(), 
+                        "Error", 
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_addFriend_ButtonActionPerformed
 
-    private void myButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton3ActionPerformed
+    private void block_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_block_ButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_myButton3ActionPerformed
+        int blockId = this.selectedUser.getId(); // ID của người bị chặn
+        int userId = Integer.parseInt(this.currentUserID);    // ID của người thực hiện chặn
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to block " + selectedUser.getUsername() + "?",
+                "Confirm Block", javax.swing.JOptionPane.YES_NO_OPTION);
+
+        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+            try {
+                UserAccountDAO userDao = new UserAccountDAO();
+                boolean alreadyBlocked = userDao.isBlockedUser(userId, blockId);
+
+                if (alreadyBlocked) {
+                    javax.swing.JOptionPane.showMessageDialog(this,
+                            "You have already blocked this user.",
+                            "Already Blocked", javax.swing.JOptionPane.WARNING_MESSAGE);
+                } else {
+                    boolean success = userDao.blockUser(userId, blockId);
+
+                    if (success) {
+                        javax.swing.JOptionPane.showMessageDialog(this,
+                                "User has been successfully blocked.",
+                                "Blocked", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                        block_Button.setEnabled(false); // Disable block button after blocking
+                    } else {
+                        javax.swing.JOptionPane.showMessageDialog(this,
+                                "Failed to block the user. Please try again.",
+                                "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "An error occurred: " + e.getMessage(),
+                        "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_block_ButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton cmdBackLogin;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JLabel jLabel1;
+    private swing.MyButton addFriend_Button;
+    private swing.MyButton block_Button;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private swing.MyButton myButton1;
-    private swing.MyButton myButton2;
-    private swing.MyButton myButton3;
+    private javax.swing.JLabel txtEmail;
+    private javax.swing.JLabel txtUsername;
     // End of variables declaration//GEN-END:variables
 }
