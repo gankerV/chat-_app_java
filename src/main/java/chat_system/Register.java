@@ -1,6 +1,9 @@
 package chat_system;
 
+import chat_system.bus.UserAccountBUS;
+import chat_system.dto.UserAccount;
 import java.awt.event.ActionListener;
+import javax.swing.JOptionPane;
 
 
 public class Register extends javax.swing.JPanel {
@@ -30,14 +33,26 @@ public class Register extends javax.swing.JPanel {
         jLabel2 = new javax.swing.JLabel();
         txtPass = new swing.MyPassword();
         jLabel3 = new javax.swing.JLabel();
-        myButton1 = new swing.MyButton();
+        sign_up = new swing.MyButton();
         cmdBackLogin = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
-        txtPass1 = new swing.MyPassword();
-        txtUser1 = new swing.MyTextField();
+        txtFullname = new swing.MyTextField();
         jLabel5 = new javax.swing.JLabel();
+        txtAddress = new swing.MyTextField();
+        jLabel6 = new javax.swing.JLabel();
+        txtDOB = new swing.MyTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtGender = new swing.MyTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtEmail = new swing.MyTextField();
 
         setBackground(new java.awt.Color(255, 255, 255));
+
+        txtUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtUserActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("User Name");
 
@@ -46,14 +61,20 @@ public class Register extends javax.swing.JPanel {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Register");
 
+        txtPass.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPassActionPerformed(evt);
+            }
+        });
+
         jLabel3.setText("Password");
 
-        myButton1.setBackground(new java.awt.Color(255, 0, 0));
-        myButton1.setForeground(new java.awt.Color(40, 40, 40));
-        myButton1.setText("Sign up");
-        myButton1.addActionListener(new java.awt.event.ActionListener() {
+        sign_up.setBackground(new java.awt.Color(255, 0, 0));
+        sign_up.setForeground(new java.awt.Color(40, 40, 40));
+        sign_up.setText("Sign up");
+        sign_up.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                myButton1ActionPerformed(evt);
+                sign_upActionPerformed(evt);
             }
         });
 
@@ -63,9 +84,45 @@ public class Register extends javax.swing.JPanel {
         cmdBackLogin.setContentAreaFilled(false);
         cmdBackLogin.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
-        jLabel4.setText("Confirm Password");
+        jLabel4.setText("Full Name");
 
-        jLabel5.setText("Email");
+        txtFullname.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtFullnameActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setText("Address");
+
+        txtAddress.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAddressActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setText("Email");
+
+        txtDOB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtDOBActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setText("Date of Birth");
+
+        txtGender.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtGenderActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setText("Gender");
+
+        txtEmail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtEmailActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -74,25 +131,31 @@ public class Register extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(50, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel5)
                     .addComponent(jLabel3)
                     .addComponent(jLabel1)
                     .addComponent(txtUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
                     .addComponent(txtPass, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(myButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(sign_up, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cmdBackLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel4)
-                    .addComponent(txtPass1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtUser1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel5)
+                    .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtFullname, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDOB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtGender, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(50, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(50, Short.MAX_VALUE)
+                .addContainerGap()
                 .addComponent(jLabel2)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -102,23 +165,126 @@ public class Register extends javax.swing.JPanel {
                 .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(txtPass1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtFullname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(txtUser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
-                .addComponent(myButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtDOB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
+                .addComponent(sign_up, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(cmdBackLogin)
-                .addGap(30, 30, 30))
+                .addGap(17, 17, 17))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void myButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton1ActionPerformed
+    private void sign_upActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sign_upActionPerformed
+        // TODO add your handling code here:                                       
+        // Lấy dữ liệu từ các trường nhập liệu
+        String username = txtUser.getText();
+        String password = new String(txtPass.getPassword());  
+        String fullname = txtFullname.getText();
+        String email = txtEmail.getText();
+        String address = txtAddress.getText();
+        String dob = txtDOB.getText();  // Yêu cầu nhập theo format "yyyy-MM-dd"
+        String gender = txtGender.getText();
+
+        // Kiểm tra dữ liệu
+        if (username.isEmpty() || password.isEmpty() || fullname.isEmpty() || email.isEmpty() || 
+            address.isEmpty() || dob.isEmpty() || gender.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tất cả các trường đều phải được điền.");
+            return;
+        }
+        
+         // Kiểm tra độ dài mật khẩu
+        if (password.length() <= 5) {
+            JOptionPane.showMessageDialog(this, "Mật khẩu phải dài hơn 5 ký tự.");
+            return;
+        }
+        
+        // Kiểm tra định dạng email
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            JOptionPane.showMessageDialog(this, "Email không hợp lệ.");
+            return;
+        }
+
+        // Kiểm tra địa chỉ có chứa số nhà và tên đường
+        if (!address.matches(".*\\d+.*") || !address.matches(".*[a-zA-Z]+.*")) {
+            JOptionPane.showMessageDialog(this, "Địa chỉ phải chứa cả số nhà và tên đường.");
+            return;
+        }
+        
+        // Kiểm tra định dạng ngày sinh (DOB)
+        if (!dob.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+            JOptionPane.showMessageDialog(this, "Ngày sinh phải theo định dạng yyyy-MM-dd.");
+            return;
+        }
+
+        // Kiểm tra giới tính (chỉ "nam" hoặc "nữ", không phân biệt hoa thường)
+        if (!gender.equalsIgnoreCase("M") && !gender.equalsIgnoreCase("F")) {
+            JOptionPane.showMessageDialog(this, "Giới tính chỉ có thể là 'M'(male) hoặc 'F'(female).");
+            return;
+        }
+
+        // Kiểm tra username (email) đã tồn tại
+        UserAccountBUS userAccountBUS = new UserAccountBUS();
+        if (userAccountBUS.isUserExists(email)) {
+            JOptionPane.showMessageDialog(this, "Tài khoản với email này đã tồn tại.");
+            return;
+        }
+
+        // Nếu tất cả đều hợp lệ, thực hiện đăng ký
+        UserAccount user = new UserAccount(username, password, fullname, email, address, dob, gender);
+        boolean isRegistered = userAccountBUS.registerUser(user);
+
+        // Phản hồi kết quả đăng ký cho người dùng
+        if (isRegistered) {
+            JOptionPane.showMessageDialog(this, "Đăng ký thành công.");
+        } else {
+            JOptionPane.showMessageDialog(this, "Đăng ký thất bại. Vui lòng thử lại.");
+        }
+    }//GEN-LAST:event_sign_upActionPerformed
+
+    private void txtPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPassActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_myButton1ActionPerformed
+    }//GEN-LAST:event_txtPassActionPerformed
+
+    private void txtUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUserActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUserActionPerformed
+
+    private void txtFullnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFullnameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFullnameActionPerformed
+
+    private void txtAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddressActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAddressActionPerformed
+
+    private void txtDOBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDOBActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDOBActionPerformed
+
+    private void txtGenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtGenderActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtGenderActionPerformed
+
+    private void txtEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEmailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEmailActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -128,10 +294,16 @@ public class Register extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private swing.MyButton myButton1;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private swing.MyButton sign_up;
+    private swing.MyTextField txtAddress;
+    private swing.MyTextField txtDOB;
+    private swing.MyTextField txtEmail;
+    private swing.MyTextField txtFullname;
+    private swing.MyTextField txtGender;
     private swing.MyPassword txtPass;
-    private swing.MyPassword txtPass1;
     private swing.MyTextField txtUser;
-    private swing.MyTextField txtUser1;
     // End of variables declaration//GEN-END:variables
 }
