@@ -458,11 +458,76 @@ public class UserAccountDAO {
         }
     }
     
+    // Phuong thuc lay danh sach loi moi ket ban
+    public List<User> getFriendRequests(int userId) throws SQLException {
+        List<User> friendRequests = new ArrayList<>();
+        String query = """
+            SELECT u.ID, u.USERNAME, u.EMAIL
+            FROM FRIEND_REQUEST fr
+            JOIN USER_ACCOUNT u ON fr.FROM_ID = u.ID
+            WHERE fr.TO_ID = ? AND fr.STATUS = 'Pending'
+              AND u.ID NOT IN (SELECT BLOCK_ID FROM USER_BLOCK WHERE USER_ID = ?);
+        """;
     
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
     
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("ID");
+                    String username = rs.getString("USERNAME");
+                    String email = rs.getString("EMAIL");
+                    friendRequests.add(new User(id, username,"", email));
+                }
+            }
+        }
+        return friendRequests;
+    }
     
+    // Phuong thuc lay danh sach nguoi dung online
+    public List<User> getOnlineFriends(int userId) throws SQLException {
+        List<User> onlineFriends = new ArrayList<>();
+        String query = """
+            SELECT u.ID, u.USERNAME,u.ON_OFF, u.EMAIL
+            FROM USER_ACCOUNT u
+            WHERE u.ID IN (
+                -- Những người là bạn của userId
+                SELECT CASE 
+                         WHEN fr.FROM_ID = ? THEN fr.TO_ID
+                         ELSE fr.FROM_ID
+                       END AS FRIEND_ID
+                FROM FRIEND_REQUEST fr
+                WHERE (fr.FROM_ID = ? OR fr.TO_ID = ?)
+                  AND fr.STATUS = 'Accepted'
+            )
+            AND u.ON_OFF = TRUE -- Người đó đang online
+            AND u.ID NOT IN (
+                -- Không nằm trong danh sách bị block
+                SELECT BLOCK_ID
+                FROM USER_BLOCK
+                WHERE USER_ID = ?
+            );
+        """;
     
-
-
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, userId);
+            stmt.setInt(4, userId);
+    
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("ID");
+                    String username = rs.getString("USERNAME");
+                    boolean isOnline = rs.getBoolean("ON_OFF");
+                    String email = rs.getString("EMAIL");
+                    onlineFriends.add(new User(id, username, isOnline ? "online" : "offline", email));
+                }
+            }
+        }
+        return onlineFriends;
+    }
 }
+
 

@@ -1,9 +1,9 @@
 package chat_system;
 
-public class GroupChat extends javax.swing.JFrame {
+public class Group_Chat extends javax.swing.JFrame {
     private final String userId;
 
-    public GroupChat(String userId) {
+    public Group_Chat(String userId) {
         this.userId = userId;
         initComponents();
         jLabel5.setText("User ID: " + userId);
@@ -222,8 +222,12 @@ public class GroupChat extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(GroupChat.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Group_Chat.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
         //</editor-fold>
@@ -238,7 +242,7 @@ public class GroupChat extends javax.swing.JFrame {
          java.awt.EventQueue.invokeLater(() -> {
             String userID = "";
         
-             new GroupChat(userID).setVisible(true);
+             new Group_Chat(userID).setVisible(true);
         });
 
     }
