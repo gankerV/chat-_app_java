@@ -1,6 +1,13 @@
 package chat_system;
 
+import chat_system.dao.UserAccountDAO;
 import java.awt.event.ActionListener;
+
+import javax.swing.JOptionPane;
+
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.util.Properties;
 
 public class PasswordRecovery extends javax.swing.JPanel {
     public PasswordRecovery() {
@@ -8,7 +15,7 @@ public class PasswordRecovery extends javax.swing.JPanel {
     }
 
     public void register() {
-        txtUser.grabFocus();
+        txtEmail.grabFocus();
     }
 
     public void addEventBackLogin(ActionListener event) {
@@ -24,15 +31,19 @@ public class PasswordRecovery extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        txtUser = new swing.MyTextField();
+        txtEmail = new swing.MyTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        txtPass = new swing.MyPassword();
-        jLabel3 = new javax.swing.JLabel();
         cmdRecover = new swing.MyButton();
         cmdBackLogin = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
+
+        txtEmail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtEmailActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Email");
 
@@ -40,8 +51,6 @@ public class PasswordRecovery extends javax.swing.JPanel {
         jLabel2.setForeground(new java.awt.Color(69, 68, 68));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Forgot password?");
-
-        jLabel3.setText("Comfirm New Password via Email");
 
         cmdRecover.setBackground(new java.awt.Color(255, 0, 0));
         cmdRecover.setForeground(new java.awt.Color(40, 40, 40));
@@ -65,11 +74,9 @@ public class PasswordRecovery extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel3)
                     .addComponent(jLabel1)
-                    .addComponent(txtUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtPass, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cmdRecover, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cmdBackLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -82,12 +89,8 @@ public class PasswordRecovery extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(188, 188, 188)
+                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(248, 248, 248)
                 .addComponent(cmdRecover, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addComponent(cmdBackLogin)
@@ -95,9 +98,78 @@ public class PasswordRecovery extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < 9; i++) {
+            int index = (int) (Math.random() * chars.length());
+            password.append(chars.charAt(index));
+        }
+        return password.toString();
+    }
+
+    private void sendEmail(String to, String subject, String content) {
+        String from = "test@example.com"; // Địa chỉ email giả
+        String smtpHost = "localhost";   // Địa chỉ server SMTP ảo
+        int smtpPort = 2500;             // Cổng server SMTP ảo
+    
+        Properties props = new Properties();
+        props.put("mail.smtp.host", smtpHost);
+        props.put("mail.smtp.port", smtpPort);
+    
+        // Không cần xác thực khi sử dụng SMTP server ảo
+        Session session = Session.getInstance(props);
+    
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(from));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            message.setSubject(subject);
+            message.setText(content);
+            Transport.send(message);
+            System.out.println("Email sent to SMTP server successfully");
+        } catch (MessagingException e) {
+            System.out.println("Error sending email: " + e.getMessage());
+        }
+    }
+    
+
     private void cmdRecoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRecoverActionPerformed
         // TODO add your handling code here:
+        String email = txtEmail.getText();
+        // Kiểm tra định dạng email
+        
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            JOptionPane.showMessageDialog(this, "Email không hợp lệ.");
+            return;
+        }
+
+        UserAccountDAO dao = new UserAccountDAO();
+
+        if (!dao.isEmailExists(email)) {
+            JOptionPane.showMessageDialog(null, "Tài khoản không tồn tại! Please register.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Tạo mật khẩu mới
+        String newPassword = generateRandomPassword();
+
+        // Cập nhật mật khẩu mới vào database
+        if (dao.updatePassword(email, newPassword)) {
+            JOptionPane.showMessageDialog(null, "Password reset successfully. Check your email and login!");
+
+            // Gửi email chứa mật khẩu mới
+            sendEmail(email, "Password Reset", "Your new password is: " + newPassword);
+        } else {
+            JOptionPane.showMessageDialog(null, "Failed to reset password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
     }//GEN-LAST:event_cmdRecoverActionPerformed
+
+    private void txtEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEmailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEmailActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -105,8 +177,6 @@ public class PasswordRecovery extends javax.swing.JPanel {
     private swing.MyButton cmdRecover;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private swing.MyPassword txtPass;
-    private swing.MyTextField txtUser;
+    private swing.MyTextField txtEmail;
     // End of variables declaration//GEN-END:variables
 }
