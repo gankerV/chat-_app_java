@@ -54,7 +54,6 @@ public class ChatHome extends javax.swing.JFrame {
         profile_button = new javax.swing.JButton();
         group_button = new javax.swing.JButton();
         cmdLogout = new javax.swing.JButton();
-        list_offline = new javax.swing.JButton();
         list_block = new javax.swing.JButton();
         list_request = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -106,8 +105,6 @@ public class ChatHome extends javax.swing.JFrame {
             }
         });
 
-
-
         jToolBar1.setBackground(new java.awt.Color(255, 0, 0));
         jToolBar1.setRollover(true);
 
@@ -147,14 +144,6 @@ public class ChatHome extends javax.swing.JFrame {
         });
         jToolBar1.add(cmdLogout);
 
-        list_offline.setBackground(new java.awt.Color(204, 204, 204));
-        list_offline.setText("Offline");
-        list_offline.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                list_offlineActionPerformed(evt);
-            }
-        });
-
         list_block.setBackground(new java.awt.Color(204, 204, 204));
         list_block.setText("Block");
         list_block.addActionListener(new java.awt.event.ActionListener() {
@@ -170,13 +159,13 @@ public class ChatHome extends javax.swing.JFrame {
                 list_requestActionPerformed(evt);
             }
         });
-
+                
         List_result.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 onUserSelected(evt);
             }
         });
-        
+    
 
         jScrollPane1.setViewportView(List_result);
 
@@ -202,9 +191,7 @@ public class ChatHome extends javax.swing.JFrame {
                                     .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
                                         .add(list_all_friend, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 81, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(list_online, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 76, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(list_offline, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 74, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                        .add(list_online, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 156, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                         .add(list_block))
                                     .add(jScrollPane1))
@@ -252,7 +239,6 @@ public class ChatHome extends javax.swing.JFrame {
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                             .add(list_all_friend, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                             .add(list_online, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(list_offline)
                             .add(list_block))
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(list_request)
@@ -299,6 +285,30 @@ public class ChatHome extends javax.swing.JFrame {
 
     private void list_onlineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_list_onlineActionPerformed
         // TODO add your handling code here:
+        listModel.clear(); // Clear current list
+        try {
+            // Lấy ID người dùng hiện tại
+            int userId = Integer.parseInt(this.currentUserID);
+
+            // Lấy danh sách bạn bè online từ DAO
+            UserAccountDAO userDao = new UserAccountDAO();
+            List<User> onlineFriends = userDao.getOnlineFriends(userId);
+
+            // Hiển thị danh sách lên List_result
+            for (User user : onlineFriends) {
+                listModel.addElement(user);
+            }
+            List_result.setModel(listModel);
+
+            if (onlineFriends.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không có bạn bè nào đang online.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra khi lấy danh sách bạn bè online: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "ID người dùng không hợp lệ.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_list_onlineActionPerformed
 
     private void cmdLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLogoutActionPerformed
@@ -351,7 +361,7 @@ public class ChatHome extends javax.swing.JFrame {
     private void group_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_group_buttonActionPerformed
         // TODO add your handling code here:
         // Tạo cửa sổ GroupChat và truyền ID
-        GroupChat groupChat = new GroupChat(this.currentUserID);
+        Group_Chat groupChat = new Group_Chat(this.currentUserID);
         groupChat.setVisible(true);
     }//GEN-LAST:event_group_buttonActionPerformed
 
@@ -383,6 +393,10 @@ public class ChatHome extends javax.swing.JFrame {
                     return c;
                 }
             });
+            
+            if (blockedUsers.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không có người bị block nào.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error fetching blocked users: " + e.getMessage());
@@ -431,12 +445,32 @@ public class ChatHome extends javax.swing.JFrame {
 
     }//GEN-LAST:event_list_all_friendActionPerformed
 
-    private void list_offlineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_list_offlineActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_list_offlineActionPerformed
-
     private void list_requestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_list_requestActionPerformed
         // TODO add your handling code here:
+        listModel.clear(); // Clear current list
+        try {
+            // Lấy ID người dùng hiện tại (giả sử currentUserID là String)
+            int userId = Integer.parseInt(this.currentUserID);
+    
+            // Lấy danh sách yêu cầu kết bạn từ DAO
+            UserAccountDAO userDao = new UserAccountDAO();
+            List<User> friendRequests = userDao.getFriendRequests(userId);
+    
+            // Hiển thị danh sách lên List_result
+            for (User user : friendRequests) {
+                listModel.addElement(user);
+            }
+            List_result.setModel(listModel);
+    
+            if (friendRequests.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không có yêu cầu kết bạn nào.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra khi lấy danh sách yêu cầu kết bạn: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "ID người dùng không hợp lệ.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_list_requestActionPerformed
 
     private void Search_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Search_ButtonActionPerformed
@@ -474,11 +508,11 @@ public class ChatHome extends javax.swing.JFrame {
         if (selectedUser != null) {
             try {
                 UserAccountDAO userDao = new UserAccountDAO();
-                int currentUserID = Integer.parseInt(this.currentUserID);
+                int curUserID = Integer.parseInt(this.currentUserID);
                 int selectedUserID = selectedUser.getId();
     
                 // Kiểm tra người được chọn có bị block không
-                if (userDao.isBlockedUser(currentUserID, selectedUserID)) {
+                if (userDao.isBlockedUser(curUserID, selectedUserID)) {
                     // Hiển thị cửa sổ xác nhận gỡ block
                     int choice = JOptionPane.showConfirmDialog(this,
                             "Bạn đã block người dùng này. Bạn có muốn gỡ block không?",
@@ -486,14 +520,14 @@ public class ChatHome extends javax.swing.JFrame {
                             JOptionPane.YES_NO_OPTION);
     
                     if (choice == JOptionPane.YES_OPTION) {
-                        userDao.unblockUser(currentUserID, selectedUserID);
+                        userDao.unblockUser(curUserID, selectedUserID);
                         JOptionPane.showMessageDialog(this, "Đã gỡ block người dùng.");
                     }
                     return; // Không xử lý tiếp các trạng thái khác
                 }
     
                 // Tiếp tục kiểm tra trạng thái bạn bè nếu người dùng không bị block
-                boolean isFriend = userDao.checkFriendship(currentUserID, selectedUserID);
+                boolean isFriend = userDao.checkFriendship(curUserID, selectedUserID);
     
                 if (isFriend) {
                     // Cửa sổ cho bạn bè
@@ -504,7 +538,7 @@ public class ChatHome extends javax.swing.JFrame {
                     dialog.setLocationRelativeTo(this);
                     dialog.setVisible(true);
                 } else {
-                    if (userDao.hasFriendRequest(selectedUserID, currentUserID)) {
+                    if (userDao.hasFriendRequest(selectedUserID, curUserID)) {
                         // Xử lý lời mời kết bạn
                         JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Friend Request", true);
                         JPanel panel = new JPanel();
@@ -515,7 +549,7 @@ public class ChatHome extends javax.swing.JFrame {
     
                         acceptButton.addActionListener(e -> {
                             try {
-                                userDao.acceptFriendRequest(selectedUserID, currentUserID);
+                                userDao.acceptFriendRequest(selectedUserID, curUserID);
                                 JOptionPane.showMessageDialog(dialog, "Đã chấp nhận kết bạn.");
                                 dialog.dispose();
                             } catch (SQLException ex) {
@@ -526,7 +560,7 @@ public class ChatHome extends javax.swing.JFrame {
     
                         rejectButton.addActionListener(e -> {
                             try {
-                                userDao.rejectFriendRequest(selectedUserID, currentUserID);
+                                userDao.rejectFriendRequest(selectedUserID, curUserID);
                                 JOptionPane.showMessageDialog(dialog, "Đã từ chối lời mời kết bạn.");
                                 dialog.dispose();
                             } catch (SQLException ex) {
@@ -626,7 +660,6 @@ public class ChatHome extends javax.swing.JFrame {
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JButton list_all_friend;
     private javax.swing.JButton list_block;
-    private javax.swing.JButton list_offline;
     private javax.swing.JButton list_online;
     private javax.swing.JButton list_request;
     private swing.MyButton myButton1;
