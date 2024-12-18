@@ -61,6 +61,8 @@ public class ChatHome extends javax.swing.JFrame {
         myTextField1 = new swing.MyTextField();
         myTextField2 = new swing.MyTextField();
         myButton1 = new swing.MyButton();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         popupMenu1.setLabel("popupMenu1");
 
@@ -104,6 +106,7 @@ public class ChatHome extends javax.swing.JFrame {
                 Search_ButtonActionPerformed(evt);
             }
         });
+
 
         jToolBar1.setBackground(new java.awt.Color(255, 0, 0));
         jToolBar1.setRollover(true);
@@ -159,14 +162,12 @@ public class ChatHome extends javax.swing.JFrame {
                 list_requestActionPerformed(evt);
             }
         });
-                
+
         List_result.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 onUserSelected(evt);
             }
         });
-    
-
         jScrollPane1.setViewportView(List_result);
 
         myTextField1.setText("message");
@@ -175,6 +176,10 @@ public class ChatHome extends javax.swing.JFrame {
 
         myButton1.setBackground(new java.awt.Color(255, 0, 0));
         myButton1.setText("Send");
+
+        jButton1.setText("Remove history chat");
+
+        jButton2.setText("Remove current chat");
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -216,9 +221,15 @@ public class ChatHome extends javax.swing.JFrame {
                                 .add(myButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                             .add(myTextField1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 480, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jScrollBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(jLabel3))
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .add(jScrollBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .add(layout.createSequentialGroup()
+                        .add(jLabel3)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(jButton2)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jButton1)
+                        .add(40, 40, 40))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -226,7 +237,10 @@ public class ChatHome extends javax.swing.JFrame {
                 .addContainerGap()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
                     .add(jToolBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 25, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jLabel3))
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(jLabel3)
+                        .add(jButton1)
+                        .add(jButton2)))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
@@ -331,7 +345,7 @@ public class ChatHome extends javax.swing.JFrame {
             }
 
             // Mở lại UserMain
-            UserMain userMain = new UserMain();
+            Main userMain = new Main();
             userMain.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Failed to logout. Please try again.", "Logout Failed", JOptionPane.ERROR_MESSAGE);
@@ -504,8 +518,9 @@ public class ChatHome extends javax.swing.JFrame {
         }
     
         User selectedUser = List_result.getSelectedValue();
-    
+        
         if (selectedUser != null) {
+            jLabel3.setText(selectedUser.getUsername());
             try {
                 UserAccountDAO userDao = new UserAccountDAO();
                 int curUserID = Integer.parseInt(this.currentUserID);
@@ -652,6 +667,8 @@ public class ChatHome extends javax.swing.JFrame {
     private javax.swing.JButton Search_Button;
     private javax.swing.JButton cmdLogout;
     private javax.swing.JButton group_button;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollBar jScrollBar1;
