@@ -6,18 +6,27 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import chat_system.bus.MessageFriendBUS;
+import chat_system.bus.MessageGroupBUS;
+import chat_system.dao.GroupChatDAO;
+import chat_system.dao.UserAccountDAO;
 import chat_system.dto.MessageFriendDTO;
+import chat_system.dto.MessageGroupDTO;
+import chat_system.dto.User;
+import chat_system.dto.UserAccount;
 
 public class ChatServer {
     private static final int PORT = 12345;
     private static Set<ClientHandler> clientHandlers = Collections.synchronizedSet(new HashSet<>());
-    private static MessageFriendBUS messageBUS = new MessageFriendBUS();  // Khởi tạo MessageFriendBUS để lưu tin nhắn
+    private static MessageFriendBUS messageFriendBUS = new MessageFriendBUS();
+    private static MessageGroupBUS messageGroupBUS = new MessageGroupBUS();  
 
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -59,10 +68,52 @@ public class ChatServer {
         MessageFriendDTO message = new MessageFriendDTO(senderId, receiverId, currentTimestamp, content, visibleOnly);
         
         // Gọi MessageFriendBUS để lưu tin nhắn
-        if (messageBUS.saveMessage(message)) {
+        if (messageFriendBUS.saveMessage(message)) {
             System.out.println("[Database] Saved message from user " + senderId + " to user " + receiverId + ": " + content);
         } else {
             System.err.println("[Database] Failed to save message.");
+        }
+    }
+
+    public static void sendMessageToGroup(String message, int senderId, int groupId) throws SQLException {
+        // Lấy danh sách thành viên của nhóm
+        List<User> users = new GroupChatDAO().getUsersByGroupId(groupId);
+        
+        // Lấy danh sách ID thành viên từ danh sách users
+        Set<Integer> userIds = new HashSet<>();
+        for (User user : users) {
+            userIds.add(user.getId());
+        }
+
+        // Lấy tên người gửi từ cơ sở dữ liệu
+        UserAccount sender = new UserAccountDAO().getUserByID(String.valueOf(senderId));
+        
+        // Format tin nhắn
+        String formattedMessage = sender.getUsername() + ": " + message;
+        
+        synchronized (clientHandlers) {
+            for (ClientHandler client : clientHandlers) {
+                // Chỉ gửi tin nhắn nếu client là chat nhóm, có ID trùng với thành viên trong nhóm và không phải người gửi
+                if (client.isChatGroup() && userIds.contains(client.getClientId()) && client.getClientId() != senderId) {
+                    client.sendMessage(formattedMessage); // Gửi tin nhắn đã định dạng username : MessageCongtent
+                }
+            }
+        }
+        
+        // Lưu tin nhắn (không định dạng ) vào cơ sở dữ liệu
+        saveGroupMessageToDatabase(senderId, groupId, message);
+    }
+
+    
+    private static void saveGroupMessageToDatabase(int senderId, int groupId, String content) {
+        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+    
+        // Lưu tin nhắn nhóm
+        MessageGroupDTO message = new MessageGroupDTO(senderId, groupId, currentTimestamp, content);
+        if (messageGroupBUS.saveGroupMessage(message)) {
+            System.out.println("[Database] Saved group message from user " + senderId + " to group " + groupId + ": " + content);
+        } else {
+            System.err.println("[Database] Failed to save group message.");
         }
     }
 
@@ -79,6 +130,11 @@ class ClientHandler implements Runnable {
     private BufferedReader in;
     private String clientName;
     private int clientId;
+    private boolean isChatGroup = false;
+
+    public boolean isChatGroup() {
+        return isChatGroup;
+    }
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -89,22 +145,18 @@ class ClientHandler implements Runnable {
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-
+    
             String message;
             while ((message = in.readLine()) != null) {
-                // Kiểm tra nếu message là ID client
                 if (message.startsWith("ID:")) {
-                    clientId = Integer.parseInt(message.split(":")[1]);  // Lấy clientId từ message
+                    clientId = Integer.parseInt(message.split(":")[1]);  // Lấy clientId
                     System.out.println("Client with ID " + clientId + " has connected.");
+                } else if (message.equalsIgnoreCase("chatGroup:true")) {
+                    isChatGroup = true;  // Đánh dấu kết nối là nhóm
+                    System.out.println("Client " + clientId + " marked as chat group.");
                 } else {
-                    // Parse the message format: "senderId:receiverId:message"
-                    String[] parts = message.split(":", 3);
-                    int senderId = Integer.parseInt(parts[0]);
-                    int receiverId = Integer.parseInt(parts[1]);
-                    String msgContent = parts[2];
-
-                    // Gửi tin nhắn đến client nhận
-                    ChatServer.sendMessageToReceiver(msgContent, senderId, receiverId);
+                    // Xử lý tin nhắn
+                    handleMessage(message);
                 }
             }
         } catch (IOException e) {
@@ -118,6 +170,27 @@ class ClientHandler implements Runnable {
             ChatServer.removeClient(this);
         }
     }
+    
+    private void handleMessage(String message) {
+        try {
+            // Parse tin nhắn
+            String[] parts = message.split(":", 3);
+            int senderId = Integer.parseInt(parts[0]);
+            int receiverOrGroupId = Integer.parseInt(parts[1]);
+            String msgContent = parts[2];
+    
+            if (isChatGroup) {
+                // Nếu là tin nhắn nhóm
+                ChatServer.sendMessageToGroup(msgContent, senderId, receiverOrGroupId);
+            } else {
+                // Nếu là tin nhắn cá nhân
+                ChatServer.sendMessageToReceiver(msgContent, senderId, receiverOrGroupId);
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing or handling message: " + e.getMessage());
+        }
+    }
+    
 
     public void sendMessage(String message) {
         out.println(message);

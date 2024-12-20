@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import connect_db.UtilityDAO;
 import chat_system.dto.GroupChat;
 import chat_system.dto.User;
+import connect_db.UtilityDAO;
 
 public class GroupChatDAO {
     private Connection conn;
@@ -104,6 +104,32 @@ public class GroupChatDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Lấy danh sách tất cả thành viên của group
+    public List<User> getUsersByGroupId(int groupId) throws SQLException {
+        List<User> users = new ArrayList<>();
+        String query = """
+            SELECT u.ID, u.USERNAME, u.ON_OFF, u.EMAIL
+            FROM USER_ACCOUNT u
+            JOIN GROUPCHAT_MEMBER gm ON u.ID = gm.MEMBER_ID
+            WHERE gm.GROUPCHAT_ID = ?;
+        """;
+
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, groupId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("ID");
+                    String username = rs.getString("USERNAME");
+                    String status = rs.getString("ON_OFF");
+                    String email = rs.getString("EMAIL");
+                    users.add(new User(id, username, status, email));
+                }
+            }
+        }
+        return users;
     }
 
     // Lấy danh sách admin của group

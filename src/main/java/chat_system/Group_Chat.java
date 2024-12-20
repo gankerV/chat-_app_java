@@ -1,26 +1,24 @@
 package chat_system;
 
-import chat_system.dao.GroupChatDAO;
-import chat_system.dao.MessageDAO;
-import chat_system.dao.UserAccountDAO;
-import chat_system.dto.GroupChat;
-import chat_system.dto.User;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
+import chat_system.dao.GroupChatDAO;
+import chat_system.dao.MessageDAO;
+import chat_system.dto.GroupChat;
+import chat_system.dto.User;
 
 public class Group_Chat extends javax.swing.JFrame {
     private final String userId;
@@ -28,6 +26,7 @@ public class Group_Chat extends javax.swing.JFrame {
     DefaultListModel<GroupChat> listModel ;
     DefaultListModel<User> listModel_2;
 
+    ChatGroup chatGroup = null;
     public Group_Chat(String userId) {
         this.userId = userId;
         initComponents();
@@ -161,9 +160,15 @@ public class Group_Chat extends javax.swing.JFrame {
 
         sendMess_Button.setBackground(new java.awt.Color(255, 0, 0));
         sendMess_Button.setText("Send");
-        sendMess_Button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sendMess_ButtonActionPerformed(evt);
+        sendMess_Button.addActionListener(e -> {
+            String message = inputMess.getText(); // Lấy nội dung từ myTextField2
+            if (!message.isEmpty()) {
+                if (chatGroup != null) { // Kiểm tra chatGroup đã được khởi tạo
+                    chatGroup.sendMessage(message); // Gửi tin nhắn qua chatGroup
+                    inputMess.setText(""); // Xóa trường nhập liệu sau khi gửi
+                } else {
+                    JOptionPane.showMessageDialog(null, "Chưa kết nối đến người dùng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -455,6 +460,24 @@ public class Group_Chat extends javax.swing.JFrame {
         this.SelectedGroupId = selectedGroup.getId();
 
         loadGroupChatHistory();
+        // kiểm tra đã tồn tại luồng xử lý người dùng này chưa
+        if (chatGroup != null && chatGroup.getGroupId() == this.SelectedGroupId) {
+            JOptionPane.showMessageDialog(this,
+                    "Đã kết nối với người dùng này. Không cần tạo lại kết nối!",
+                    "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Hủy ChatClient cũ (nếu có) để tạo mới
+        if (chatGroup != null) {
+            chatGroup.cancel(true); // Hủy thread cũ
+            chatGroup = null; // Giải phóng tài nguyên
+        }
+
+        // Tạo một ChatClient mới
+        chatGroup = new ChatGroup("localhost", 12345, Integer.parseInt(this.userId),"You", this.SelectedGroupId);
+        chatGroup.execute(); // Bắt đầu xử lý song song bằng SwingWorker        
     }
 
     private void onMemberSelected(javax.swing.event.ListSelectionEvent evt) {
@@ -530,6 +553,84 @@ public class Group_Chat extends javax.swing.JFrame {
             }
         }
     }
+    
+    public class ChatGroup extends SwingWorker<Void, String> {
+        private String serverAddress;
+        private int serverPort;
+        private int senderId;
+        private String senderUsername;
+        private int groupId;
+        private Socket socket;
+        private BufferedReader in;
+        private PrintWriter out;
+    
+        public ChatGroup(String serverAddress, int serverPort, int senderId, String senderUsername, int groupId) {
+            this.serverAddress = serverAddress;
+            this.serverPort = serverPort;
+            this.senderId = senderId;
+            this.senderUsername = senderUsername;
+            this.groupId = groupId;
+        }
+    
+        public int getGroupId() {
+            return groupId;
+        }
+    
+        public String getSenderUsername() {
+            return senderUsername;
+        }
+    
+        @Override
+        protected Void doInBackground() throws Exception {
+            try {
+                // Kết nối tới server
+                socket = new Socket(serverAddress, serverPort);
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                out = new PrintWriter(socket.getOutputStream(), true);
+    
+                // Gửi senderId và xác định là nhóm ngay khi kết nối
+                out.println("ID:" + senderId);
+                out.println("chatGroup:true");
+    
+                // Lắng nghe tin nhắn từ server
+                String incomingMessage;
+                while ((incomingMessage = in.readLine()) != null) {
+                    publish(incomingMessage); // Gửi tin nhắn đến UI để xử lý
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+            }
+            return null;
+        }
+    
+        @Override
+        protected void process(List<String> messages) {
+            for (String message : messages) {
+                //message đang có dạng username : messageContent
+                Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+                String formattedMessage = "[" + currentTimestamp + "] " + message + "\n";
+
+                ChatHistory.append(formattedMessage);
+            }
+        }
+    
+        public void sendMessage(String message) {
+            String senderUsername = this.senderUsername;
+            if (out != null) {
+                String serverFormattedMessage = senderId + ":" + groupId + ":" + message; // Add sender and group ID
+                out.println(serverFormattedMessage); // Send the message to server
+    
+                Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+                String formattedMessage = "[" + currentTimestamp + "] " + senderUsername + ": " + message + "\n";
+                ChatHistory.append(formattedMessage);
+            }
+        }
+    }
+    
     
     
 

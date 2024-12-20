@@ -157,6 +157,7 @@ INSERT INTO GROUPCHAT_MEMBER (GROUPCHAT_ID, MEMBER_ID, POSITION)
 VALUES
 (1, 1, 'Admin'),
 (1, 2, 'Member'),
+(1, 3, 'Member'),
 (2, 3, 'Admin');
 
 
@@ -164,6 +165,7 @@ INSERT INTO MESSAGE_GROUP (FROM_USER, TO_GROUP, TIME_SEND, CONTENT)
 VALUES
 (1, 1, CURRENT_TIMESTAMP, 'Hello Group 1!'),
 (2, 1, CURRENT_TIMESTAMP, 'Hi, everyone!'),
+(3, 1, CURRENT_TIMESTAMP, 'Whos admin'),
 (3, 2, CURRENT_TIMESTAMP, 'Hello Group 2!');
 
 
