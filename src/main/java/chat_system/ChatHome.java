@@ -6,9 +6,13 @@ import chat_system.dao.UserAccountDAO;
 import chat_system.dto.User;
 import chat_system.dto.UserAccount;
 import java.awt.Color;
-
 import java.awt.Component;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -27,10 +31,19 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
+import chat_system.dao.MessageDAO;
+import chat_system.dao.UserAccountDAO;
+import chat_system.dto.User;
+import chat_system.dto.UserAccount;
 
 public class ChatHome extends javax.swing.JFrame {
     private int SelectedUserId = -1;
     DefaultListModel<User> listModel ;
+
+    ChatClient chatClient= null;
+
     public ChatHome() { 
         initComponents();
         listModel = new DefaultListModel<>();
@@ -180,9 +193,15 @@ public class ChatHome extends javax.swing.JFrame {
 
         sentMess_Button.setBackground(new java.awt.Color(255, 0, 0));
         sentMess_Button.setText("Send");
-        sentMess_Button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sentMess_ButtonActionPerformed(evt);
+        sentMess_Button.addActionListener(e -> {
+            String message = inputMess.getText(); // Lấy nội dung từ myTextField2
+            if (!message.isEmpty()) {
+                if (chatClient != null) { // Kiểm tra chatClient đã được khởi tạo
+                    chatClient.sendMessage(message); // Gửi tin nhắn qua chatClient
+                    inputMess.setText(""); // Xóa trường nhập liệu sau khi gửi
+                } else {
+                    JOptionPane.showMessageDialog(null, "Chưa kết nối đến người dùng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -327,6 +346,7 @@ public class ChatHome extends javax.swing.JFrame {
     public void setCurrentUserID(String id) {
         this.currentUserID = id;
     }
+
 
     private void list_onlineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_list_onlineActionPerformed
         // TODO add your handling code here:
@@ -768,8 +788,10 @@ public class ChatHome extends javax.swing.JFrame {
             try {
                 UserAccountDAO userDao = new UserAccountDAO();
                 int curUserID = Integer.parseInt(this.currentUserID);
+                String curUsername = "You";
                 int selectedUserID = selectedUser.getId();
-    
+                String selectedUserName = selectedUser.getUsername();
+                
                 // Kiểm tra người được chọn có bị block không
                 if (userDao.isBlockedUser(curUserID, selectedUserID)) {
                     // Hiển thị cửa sổ xác nhận gỡ block
@@ -789,6 +811,24 @@ public class ChatHome extends javax.swing.JFrame {
                 boolean isFriend = userDao.checkFriendship(curUserID, selectedUserID);
     
                 if (isFriend) {
+                    // kiểm tra đã tồn tại luồng xử lý người dùng này chưa
+                    if (chatClient != null && chatClient.getReceiverId() == selectedUserID) {
+                        JOptionPane.showMessageDialog(this,
+                                "Đã kết nối với người dùng này. Không cần tạo lại kết nối!",
+                                "Thông báo",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+    
+                    // Hủy ChatClient cũ (nếu có) để tạo mới
+                    if (chatClient != null) {
+                        chatClient.cancel(true); // Hủy thread cũ
+                        chatClient = null; // Giải phóng tài nguyên
+                    }
+
+                    // Tạo một ChatClient mới
+                    chatClient = new ChatClient("localhost", 12345, curUserID,curUsername, selectedUserID,selectedUserName);
+                    chatClient.execute(); // Bắt đầu xử lý song song bằng SwingWorker
                     // Cửa sổ cho bạn bè
                     JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Friend", true);
                     Unfriend_and_Report friendPanel = new Unfriend_and_Report(this.currentUserID, selectedUser);
@@ -852,6 +892,87 @@ public class ChatHome extends javax.swing.JFrame {
                         "Có lỗi xảy ra: " + e.getMessage(),
                         "Lỗi",
                         JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    private class ChatClient extends SwingWorker<Void, String> {
+        private String serverAddress;
+        private int serverPort;
+        private int senderId;
+        private String senderUsername;
+        private int receiverId;
+        private String receiverUsername;
+        private Socket socket;
+        private BufferedReader in;
+        private PrintWriter out;
+    
+        public ChatClient(String serverAddress, int serverPort, int senderId, String senderUsername, int receiverId, String receiverUsername) {
+            this.serverAddress = serverAddress;
+            this.serverPort = serverPort;
+            this.senderId = senderId;
+            this.senderUsername = senderUsername;
+            this.receiverId = receiverId;
+            this.receiverUsername = receiverUsername;
+        }
+    
+        public int getReceiverId() {
+            return receiverId;
+        }
+    
+        public String getSenderUsername() {
+            return senderUsername;
+        }
+    
+        public String getReceiverUsername() {
+            return receiverUsername;
+        }
+    
+        @Override
+        protected Void doInBackground() throws Exception {
+            try {
+                // Kết nối tới server
+                socket = new Socket(serverAddress, serverPort);
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                out = new PrintWriter(socket.getOutputStream(), true);
+    
+                // Gửi senderId tới server ngay khi kết nối
+                out.println("ID:" + senderId);
+    
+                // Lắng nghe tin nhắn từ server
+                String incomingMessage;
+                while ((incomingMessage = in.readLine()) != null) {
+                    publish(incomingMessage); // Gửi tin nhắn đến UI để xử lý
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+            }
+            return null;
+        }
+    
+        @Override
+        protected void process(List<String> messages) {
+            String receiverUsername= this.receiverUsername;
+            for (String message : messages) {
+                Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+                String formattedMessage = "[" + currentTimestamp + "] " + receiverUsername + ": " + message + "\n";
+                displayChatHistory.append(formattedMessage);
+            }
+        }
+    
+        public void sendMessage(String message) {
+            String senderUsername= this.senderUsername;
+            if (out != null) {
+                String ServerformattedMessage = senderId + ":" + receiverId + ":" + message;  // Add sender and receiver ID
+                out.println(ServerformattedMessage); // Send the message to server
+    
+                Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+                String formattedMessage = "[" + currentTimestamp + "] " + senderUsername + ": " + message + "\n";
+                displayChatHistory.append(formattedMessage);
             }
         }
     }
