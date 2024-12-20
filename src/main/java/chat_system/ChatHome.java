@@ -1,6 +1,8 @@
 package chat_system;
 
+import chat_system.dao.MessageDAO;
 import chat_system.dao.UserAccountDAO;
+
 import chat_system.dto.User;
 import chat_system.dto.UserAccount;
 import java.awt.Color;
@@ -8,7 +10,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
@@ -20,9 +24,12 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 public class ChatHome extends javax.swing.JFrame {
+    private int SelectedUserId = -1;
     DefaultListModel<User> listModel ;
     public ChatHome() { 
         initComponents();
@@ -43,8 +50,6 @@ public class ChatHome extends javax.swing.JFrame {
         popupMenu3 = new java.awt.PopupMenu();
         popupMenu4 = new java.awt.PopupMenu();
         jLabel1 = new javax.swing.JLabel();
-        jScrollBar1 = new javax.swing.JScrollBar();
-        jScrollBar2 = new javax.swing.JScrollBar();
         list_all_friend = new javax.swing.JButton();
         list_online = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
@@ -58,11 +63,15 @@ public class ChatHome extends javax.swing.JFrame {
         list_request = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         List_result = new javax.swing.JList<>();
-        myTextField1 = new swing.MyTextField();
-        myTextField2 = new swing.MyTextField();
-        myButton1 = new swing.MyButton();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        inputMess = new swing.MyTextField();
+        sentMess_Button = new swing.MyButton();
+        remove_all_chat = new javax.swing.JButton();
+        remove_row_chat = new javax.swing.JButton();
+        list_offline = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        displayChatHistory = new javax.swing.JTextArea();
+        searchWithUserButton = new javax.swing.JButton();
+        searchAllButton = new javax.swing.JButton();
 
         popupMenu1.setLabel("popupMenu1");
 
@@ -106,7 +115,6 @@ public class ChatHome extends javax.swing.JFrame {
                 Search_ButtonActionPerformed(evt);
             }
         });
-
 
         jToolBar1.setBackground(new java.awt.Color(255, 0, 0));
         jToolBar1.setRollover(true);
@@ -170,16 +178,55 @@ public class ChatHome extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(List_result);
 
-        myTextField1.setText("message");
+        sentMess_Button.setBackground(new java.awt.Color(255, 0, 0));
+        sentMess_Button.setText("Send");
+        sentMess_Button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sentMess_ButtonActionPerformed(evt);
+            }
+        });
 
-        myTextField2.setText("TextField");
+        remove_all_chat.setText("Remove history chat");
+        remove_all_chat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                remove_all_chatActionPerformed(evt);
+            }
+        });
 
-        myButton1.setBackground(new java.awt.Color(255, 0, 0));
-        myButton1.setText("Send");
+        remove_row_chat.setText("Remove current chat");
+        remove_row_chat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                remove_row_chatActionPerformed(evt);
+            }
+        });
 
-        jButton1.setText("Remove history chat");
+        list_offline.setBackground(new java.awt.Color(204, 204, 204));
+        list_offline.setText("Offline");
+        list_offline.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                list_offlineActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Remove current chat");
+        displayChatHistory.setColumns(20);
+        displayChatHistory.setRows(5);
+        jScrollPane2.setViewportView(displayChatHistory);
+
+        searchWithUserButton.setBackground(new java.awt.Color(204, 204, 204));
+        searchWithUserButton.setText("SearchChatUser");
+        searchWithUserButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchWithUserButtonActionPerformed(evt);
+            }
+        });
+
+        searchAllButton.setBackground(new java.awt.Color(204, 204, 204));
+        searchAllButton.setText("SearchChatAll");
+        searchAllButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchAllButtonActionPerformed(evt);
+            }
+        });
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -188,48 +235,49 @@ public class ChatHome extends javax.swing.JFrame {
             .add(layout.createSequentialGroup()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
+                        .add(151, 151, 151)
+                        .add(jLabel1))
+                    .add(layout.createSequentialGroup()
                         .add(20, 20, 20)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(layout.createSequentialGroup()
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, list_request, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
-                                        .add(list_all_friend, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 81, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(list_online, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 156, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(list_block))
-                                    .add(jScrollPane1))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(jScrollBar2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                             .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
                                 .add(jToolBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 327, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                 .add(layout.createSequentialGroup()
                                     .add(Search_Button, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 78, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                    .add(txtSearch, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 243, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))))
-                    .add(layout.createSequentialGroup()
-                        .add(151, 151, 151)
-                        .add(jLabel1)))
-                .add(12, 12, 12)
+                                    .add(txtSearch, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 243, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                                .add(layout.createSequentialGroup()
+                                    .add(searchWithUserButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 159, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                    .add(searchAllButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 156, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, list_request, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                                    .add(list_all_friend, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 81, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                    .add(list_online, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                    .add(list_offline, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 78, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .add(8, 8, 8)
+                                    .add(list_block))
+                                .add(jScrollPane1)))))
+                .add(22, 22, 22)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(layout.createSequentialGroup()
-                                .add(myTextField2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 373, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .add(18, 18, 18)
-                                .add(myButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                            .add(myTextField1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 480, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jScrollBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .add(inputMess, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 373, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(18, 18, 18)
+                        .add(sentMess_Button, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(18, Short.MAX_VALUE))
                     .add(layout.createSequentialGroup()
                         .add(jLabel3)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(jButton2)
+                        .add(remove_row_chat)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jButton1)
-                        .add(40, 40, 40))))
+                        .add(remove_all_chat)
+                        .add(40, 40, 40))
+                    .add(layout.createSequentialGroup()
+                        .add(jScrollPane2)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -239,58 +287,41 @@ public class ChatHome extends javax.swing.JFrame {
                     .add(jToolBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 25, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                         .add(jLabel3)
-                        .add(jButton1)
-                        .add(jButton2)))
+                        .add(remove_all_chat)
+                        .add(remove_row_chat)))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                             .add(Search_Button)
                             .add(txtSearch, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                            .add(searchWithUserButton)
+                            .add(searchAllButton))
                         .add(13, 13, 13)
                         .add(jLabel1)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                             .add(list_all_friend, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                             .add(list_online, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(list_block))
+                            .add(list_block)
+                            .add(list_offline))
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(list_request)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jScrollBar2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 457, Short.MAX_VALUE)
-                            .add(jScrollPane1)))
+                        .add(jScrollPane1))
                     .add(layout.createSequentialGroup()
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                            .add(myTextField1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .add(jScrollBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 532, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 9, Short.MAX_VALUE)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(myButton1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .add(myTextField2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .add(sentMess_Button, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(inputMess, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE))))
                 .add(15, 15, 15))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void myTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myTextField1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_myTextField1ActionPerformed
-
-    private void myTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myTextField3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_myTextField3ActionPerformed
-
-    private void myButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton1ActionPerformed
-        // TODO add your handling code here:
-        
-        
-    }//GEN-LAST:event_myButton1ActionPerformed
-
-    private void myButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_myButton3ActionPerformed
 
     private String currentUserID;
     public void setCurrentUserID(String id) {
@@ -512,6 +543,203 @@ public class ChatHome extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_Search_ButtonActionPerformed
 
+    private void sentMess_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sentMess_ButtonActionPerformed
+        // TODO add your handling code here:
+        if (inputMess.getText().isEmpty()) return;
+
+        try {
+            String messageContent = inputMess.getText();
+            int fromUserId = Integer.parseInt(this.currentUserID); // Lấy ID của người dùng hiện tại
+            int toUserId = this.SelectedUserId; // Lấy ID của người đang chat cùng
+
+            // Thêm tin nhắn vào cơ sở dữ liệu
+            MessageDAO messageDao = new MessageDAO();
+            messageDao.addMessage(fromUserId, toUserId, messageContent);
+       
+
+        // Ghi dữ liệu vào textArea ở phía trên
+        try {
+            Map<String, Object> messageDetails = messageDao.getLastMessageDetails(fromUserId, toUserId);
+
+            if (messageDetails != null) {
+                Timestamp sendAt = (Timestamp) messageDetails.get("SEND_AT");
+                String username = (String) messageDetails.get("USERNAME");
+
+                String formattedMessage = "[" + sendAt + "] " + username + ": " + messageContent + "\n";
+                displayChatHistory.append(formattedMessage);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi lấy thông tin tin nhắn.");
+        }
+
+        
+        // Xóa hết tin nhắn tại ô nhập tin nhắn
+        inputMess.setText("");
+        } catch (Exception e) {
+        System.out.println("Error while sendding messeger");
+        }
+    }//GEN-LAST:event_sentMess_ButtonActionPerformed
+
+    private void remove_all_chatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_all_chatActionPerformed
+        // TODO add your handling code here:
+        try {
+            int fromUserId = Integer.parseInt(this.currentUserID); // ID của người dùng hiện tại
+            int toUserId = this.SelectedUserId; // ID của người đang chat cùng
+            
+            if (toUserId == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một người để xóa lịch sử chat.");
+                return;
+            }
+            
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Bạn có chắc chắn muốn xóa toàn bộ lịch sử chat không?",
+                    "Xóa lịch sử chat",
+                    JOptionPane.YES_NO_OPTION);
+            
+            if (confirm == JOptionPane.YES_OPTION) {
+                MessageDAO messageDao = new MessageDAO();
+                boolean success = messageDao.deleteAllMessages(fromUserId, toUserId);
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Đã xóa toàn bộ lịch sử chat.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Lỗi khi xóa lịch sử chat.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi xử lý.");
+        }
+    }//GEN-LAST:event_remove_all_chatActionPerformed
+
+    private void remove_row_chatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_row_chatActionPerformed
+        // TODO add your handling code here:
+        try {
+            int fromUserId = Integer.parseInt(this.currentUserID); // ID của người dùng hiện tại
+            int toUserId = this.SelectedUserId; // ID của người đang chat cùng
+            
+            if (toUserId == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một người để xóa tin nhắn.");
+                return;
+            }
+    
+            MessageDAO messageDao = new MessageDAO();
+            boolean success = messageDao.deleteLatestMessage(fromUserId, toUserId);
+    
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Đã xóa tin nhắn mới nhất.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Không có tin nhắn nào để xóa hoặc xảy ra lỗi.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi xử lý.");
+        }
+    }//GEN-LAST:event_remove_row_chatActionPerformed
+
+    private void list_offlineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_list_offlineActionPerformed
+        // TODO add your handling code here:
+        listModel.clear(); // Clear current list
+        try {
+            // Lấy ID người dùng hiện tại
+            int userId = Integer.parseInt(this.currentUserID);
+
+            // Lấy danh sách bạn bè online từ DAO
+            UserAccountDAO userDao = new UserAccountDAO();
+            List<User> onlineFriends = userDao.getOfflineFriends(userId);
+
+            // Hiển thị danh sách lên List_result
+            for (User user : onlineFriends) {
+                listModel.addElement(user);
+            }
+            List_result.setModel(listModel);
+
+            if (onlineFriends.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không có bạn bè nào đang offline.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra khi lấy danh sách bạn bè offline: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "ID người dùng không hợp lệ.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_list_offlineActionPerformed
+
+    private void searchWithUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchWithUserButtonActionPerformed
+        // TODO add your handling code here:
+        String keyword = txtSearch.getText();
+        if (keyword.isEmpty()) return;
+
+        try {
+            MessageDAO messageDao = new MessageDAO();
+            List<String> results = messageDao.searchMessagesWithUser(Integer.parseInt(this.currentUserID), this.SelectedUserId, keyword);
+            displayChatHistory.setText(""); // Xóa nội dung hiện tại
+
+            for (String message : results) {
+                displayChatHistory.append(message + "\n");
+            }
+
+            if (!results.isEmpty()) {
+                displayChatHistory.setCaretPosition(0); // Cuộn đến đầu đoạn chat
+            } else {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy kết quả.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi tìm kiếm.");
+        }
+    }//GEN-LAST:event_searchWithUserButtonActionPerformed
+
+    private void searchAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchAllButtonActionPerformed
+        // TODO add your handling code here:
+        String keyword = txtSearch.getText();
+        if (keyword.isEmpty()) return;
+
+        try {
+            MessageDAO messageDao = new MessageDAO();
+            List<String> results = messageDao.searchMessagesWithAllUsers(Integer.parseInt(this.currentUserID), keyword);
+
+            if (results.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy kết quả.");
+                return;
+            }
+
+            // Tạo JDialog để hiển thị kết quả
+            JDialog searchDialog = new JDialog(this, "Kết quả tìm kiếm", true);
+            searchDialog.setSize(400, 300);
+            searchDialog.setLocationRelativeTo(this);
+
+            // Tạo JList hiển thị kết quả
+            DefaultListModel<String> listModel_temp = new DefaultListModel<>();
+            for (String result : results) {
+                listModel_temp.addElement(result);
+            }
+
+            JList<String> resultList = new JList<>(listModel_temp);
+            resultList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            resultList.addListSelectionListener(e -> {
+                if (!e.getValueIsAdjusting()) {
+                    String selectedMessage = resultList.getSelectedValue();
+                    if (selectedMessage != null) {
+                        // Hiển thị đoạn chat tương ứng trong JTextArea
+                        displayChatHistory.append(selectedMessage + "\n");
+                        searchDialog.dispose(); // Đóng popup sau khi chọn
+                    }
+                }
+            });
+
+            // Thêm JList vào JScrollPane để cuộn
+            JScrollPane scrollPane = new JScrollPane(resultList);
+            searchDialog.add(scrollPane);
+
+            // Hiển thị popup
+            searchDialog.setVisible(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi tìm kiếm.");
+        }
+    }//GEN-LAST:event_searchAllButtonActionPerformed
+
     private void onUserSelected(javax.swing.event.ListSelectionEvent evt) {
         if (evt.getValueIsAdjusting()) {
             return;
@@ -520,7 +748,23 @@ public class ChatHome extends javax.swing.JFrame {
         User selectedUser = List_result.getSelectedValue();
         
         if (selectedUser != null) {
+            this.SelectedUserId = selectedUser.getId();
             jLabel3.setText(selectedUser.getUsername());
+            try {
+                MessageDAO messageDao = new MessageDAO();
+                List<String> chatHistory = messageDao.getChatHistory(Integer.parseInt(this.currentUserID), selectedUser.getId());
+                
+                StringBuilder chatContent = new StringBuilder();
+                for (String message : chatHistory) {
+                    chatContent.append(message.toString()).append("\n");
+                }
+                
+                displayChatHistory.setText(chatContent.toString());
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi tải lịch sử chat.");
+            }
+
             try {
                 UserAccountDAO userDao = new UserAccountDAO();
                 int curUserID = Integer.parseInt(this.currentUserID);
@@ -666,27 +910,29 @@ public class ChatHome extends javax.swing.JFrame {
     private javax.swing.JList<User> List_result;
     private javax.swing.JButton Search_Button;
     private javax.swing.JButton cmdLogout;
+    private javax.swing.JTextArea displayChatHistory;
     private javax.swing.JButton group_button;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private swing.MyTextField inputMess;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JScrollBar jScrollBar1;
-    private javax.swing.JScrollBar jScrollBar2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JButton list_all_friend;
     private javax.swing.JButton list_block;
+    private javax.swing.JButton list_offline;
     private javax.swing.JButton list_online;
     private javax.swing.JButton list_request;
-    private swing.MyButton myButton1;
-    private swing.MyTextField myTextField1;
-    private swing.MyTextField myTextField2;
     private java.awt.PopupMenu popupMenu1;
     private java.awt.PopupMenu popupMenu2;
     private java.awt.PopupMenu popupMenu3;
     private java.awt.PopupMenu popupMenu4;
     private javax.swing.JButton profile_button;
+    private javax.swing.JButton remove_all_chat;
+    private javax.swing.JButton remove_row_chat;
+    private javax.swing.JButton searchAllButton;
+    private javax.swing.JButton searchWithUserButton;
+    private swing.MyButton sentMess_Button;
     private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
