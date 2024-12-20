@@ -1,5 +1,9 @@
 package chat_system;
 
+import javax.swing.*;
+
+import java.awt.*;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,23 +30,94 @@ public class ChatServer {
     private static final int PORT = 12345;
     private static Set<ClientHandler> clientHandlers = Collections.synchronizedSet(new HashSet<>());
     private static MessageFriendBUS messageFriendBUS = new MessageFriendBUS();
-    private static MessageGroupBUS messageGroupBUS = new MessageGroupBUS();  
+    private static MessageGroupBUS messageGroupBUS = new MessageGroupBUS();
+
+    // GUI components
+    private static JTextArea logArea;
+    private static JButton startServerButton;
+    private static JLabel statusLabel;
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Chat server is running on port " + PORT);
+        // Create the GUI
+        createGUI();
 
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("New client connected: " + clientSocket.getInetAddress());
-                ClientHandler clientHandler = new ClientHandler(clientSocket);
-                clientHandlers.add(clientHandler);
-                new Thread(clientHandler).start();
-            }
-        } catch (IOException e) {
-            System.err.println("Server error: " + e.getMessage());
-        }
+        // Start the server on a separate thread
+        startServer();
     }
+
+    // Create the GUI components
+    private static void createGUI() {
+        JFrame frame = new JFrame("Chat Server");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 300);
+        frame.setLayout(new BorderLayout());
+
+        // Log Area
+        logArea = new JTextArea();
+        logArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(logArea);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        // Status Label
+        statusLabel = new JLabel("Server not started", JLabel.CENTER);
+        frame.add(statusLabel, BorderLayout.NORTH);
+
+        // Start Server Button
+        startServerButton = new JButton("Start Server");
+        startServerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startServer();
+            }
+        });
+        frame.add(startServerButton, BorderLayout.SOUTH);
+
+        frame.setVisible(true);
+    }
+
+    // Start the chat server
+    private static void startServer() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+                    updateLog("Chat server is running on port " + PORT);
+                    updateStatus("Server running");
+
+                    while (true) {
+                        Socket clientSocket = serverSocket.accept();
+                        updateLog("New client connected: " + clientSocket.getInetAddress());
+                        ClientHandler clientHandler = new ClientHandler(clientSocket);
+                        clientHandlers.add(clientHandler);
+                        new Thread(clientHandler).start();
+                    }
+                } catch (IOException e) {
+                    updateLog("Server error: " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    // Method to update the log area
+    private static void updateLog(String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                logArea.append(message + "\n");
+            }
+        });
+    }
+
+    // Method to update the status label
+    private static void updateStatus(String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                statusLabel.setText(message);
+            }
+        });
+    }
+
 
     // Send message to a specific receiver by receiverId
     public static void sendMessageToReceiver(String message, int senderId, int receiverId) {
