@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import chat_system.bus.*;
-import chat_system.dto.*;
+import chat_system.bus.MessageFriendBUS;
+import chat_system.dto.MessageFriendDTO;
 
 public class ChatServer {
     private static final int PORT = 12345;
@@ -45,11 +45,7 @@ public class ChatServer {
                 }
             }
         }
-        
-        // Lưu tin nhắn vào database
-        String[] parts = message.split(": ", 2);
-        String msgContent = parts[1];
-        saveMessageToDatabase(senderId, receiverId, msgContent);
+        saveMessageToDatabase(senderId, receiverId, message);
     }
 
     private static void saveMessageToDatabase(int senderId, int receiverId, String content) {
@@ -108,7 +104,7 @@ class ClientHandler implements Runnable {
                     String msgContent = parts[2];
 
                     // Gửi tin nhắn đến client nhận
-                    ChatServer.sendMessageToReceiver(senderId + ": " + msgContent, senderId, receiverId);
+                    ChatServer.sendMessageToReceiver(msgContent, senderId, receiverId);
                 }
             }
         } catch (IOException e) {

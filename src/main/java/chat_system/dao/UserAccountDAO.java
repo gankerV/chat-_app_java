@@ -5,12 +5,16 @@
 package chat_system.dao;
 
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import chat_system.dto.User;
 import chat_system.dto.UserAccount;
 import connect_db.UtilityDAO;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserAccountDAO {
     private final Connection conn;
@@ -527,6 +531,49 @@ public class UserAccountDAO {
             }
         }
         return onlineFriends;
+    }
+
+    public List<User> getOfflineFriends(int userId) throws SQLException {
+        List<User> offlineFriends = new ArrayList<>();
+        String query = """
+            SELECT u.ID, u.USERNAME,u.ON_OFF, u.EMAIL
+            FROM USER_ACCOUNT u
+            WHERE u.ID IN (
+                -- Những người là bạn của userId
+                SELECT CASE 
+                         WHEN fr.FROM_ID = ? THEN fr.TO_ID
+                         ELSE fr.FROM_ID
+                       END AS FRIEND_ID
+                FROM FRIEND_REQUEST fr
+                WHERE (fr.FROM_ID = ? OR fr.TO_ID = ?)
+                  AND fr.STATUS = 'Accepted'
+            )
+            AND u.ON_OFF = FALSE -- Người đó đang offline
+            AND u.ID NOT IN (
+                -- Không nằm trong danh sách bị block
+                SELECT BLOCK_ID
+                FROM USER_BLOCK
+                WHERE USER_ID = ?
+            );
+        """;
+    
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, userId);
+            stmt.setInt(4, userId);
+    
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("ID");
+                    String username = rs.getString("USERNAME");
+                    boolean isOnline = rs.getBoolean("ON_OFF");
+                    String email = rs.getString("EMAIL");
+                    offlineFriends.add(new User(id, username, isOnline ? "online" : "offline", email));
+                }
+            }
+        }
+        return offlineFriends;
     }
 }
 
