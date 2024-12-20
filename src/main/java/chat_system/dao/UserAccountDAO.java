@@ -5,12 +5,16 @@
 package chat_system.dao;
 
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import chat_system.dto.User;
 import chat_system.dto.UserAccount;
 import connect_db.UtilityDAO;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserAccountDAO {
     private final Connection conn;

@@ -193,6 +193,14 @@ public class Group_Chat extends javax.swing.JFrame {
         ChatHistory.setRows(5);
         jScrollPane3.setViewportView(ChatHistory);
 
+        ls_gr_Button.setBackground(new java.awt.Color(153, 153, 153));
+        ls_gr_Button.setText("Group List");
+        ls_gr_Button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ls_gr_ButtonActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -248,14 +256,6 @@ public class Group_Chat extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void myTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myTextField3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_myTextField3ActionPerformed
-
-    private void myButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_myButton1ActionPerformed
 
     private void ls_gr_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ls_gr_ButtonActionPerformed
         listModel.clear(); // Clear current list
